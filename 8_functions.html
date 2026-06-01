@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level 7: Introduction to Functions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                        heading: ['Space Grotesk', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --color-bg: #0f172a;
+            --color-card: #1e293b;
+            --color-primary: #3b82f6;
+            --color-accent: #10b981;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --color-text: #f8fafc;
+            --color-text-muted: #94a3b8;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Nunito', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(50px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        .slide.prev {
+            transform: translateX(-50px);
+        }
+
+        #slide-counter {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 50;
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 50;
+        }
+
+        .nav-hint {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            pointer-events: none;
+            z-index: 40;
+        }
+
+        .key-box {
+            background: var(--color-card);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            margin: 0 0.2rem;
+            font-family: monospace;
+        }
+
+        .code-container {
+            background: #0b0f19;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .terminal-output {
+            background: #05070f;
+            font-family: 'Fira Code', monospace;
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .buggy-line {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .buggy-line:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .buggy-line.selected-bug {
+            background: rgba(239, 68, 68, 0.25) !important;
+            border-left: 4px solid var(--color-danger);
+        }
+        .buggy-line.selected-clean {
+            background: rgba(16, 185, 129, 0.25) !important;
+            border-left: 4px solid var(--color-accent);
+        }
+
+        .brand-logo {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body>
+
+<div class="brand-logo text-blue-500">
+    <i class="fa-solid fa-code-blocks text-xl"></i>
+    <span>EduSlides <span class="text-emerald-400">CS</span></span>
+</div>
+
+<div id="slide-counter">1 / 7</div>
+
+<div id="presentation-container" class="w-full h-full relative overflow-hidden">
+
+    <div class="slide active bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 justify-center">
+        <div class="max-w-4xl text-center space-y-6 px-4">
+            <span class="px-4 py-1.5 bg-blue-500/10 text-blue-400 rounded-full text-sm font-semibold tracking-wider uppercase border border-blue-500/20 font-heading">
+                Class 7 &bull; Computational Core
+            </span>
+            <h1 class="text-5xl md:text-6xl font-black tracking-tight font-heading text-white">
+                Introduction to <span class="bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">Functions</span>
+            </h1>
+            <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+                Master the art of structural clean code by packaging blocks of instructions into reusable, parametric operations.
+            </p>
+            
+            <div class="mt-12 p-6 bg-slate-800/50 backdrop-blur-md rounded-2xl border border-slate-700 text-left space-y-4 max-w-xl mx-auto shadow-2xl">
+                <div class="flex items-center gap-3 text-emerald-400 font-heading font-bold text-lg">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <h2>Today's Learning Objectives</h2>
+                </div>
+                <ul class="space-y-2 text-slate-300 pl-2">
+                    <li class="flex items-start gap-2">
+                        <i class="fa-solid fa-check text-emerald-500 mt-1 text-sm"></i>
+                        <span>Understand, define, and execute modular reusable routines using the <code class="bg-slate-900 px-1.5 py-0.5 rounded text-blue-400 font-mono text-sm">def</code> statement.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fa-solid fa-check text-emerald-500 mt-1 text-sm"></i>
+                        <span>Pass contextual inputs into routines via scoped function variables (**Parameters**).</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="fa-solid fa-check text-emerald-500 mt-1 text-sm"></i>
+                        <span>Extract results seamlessly out of code routines using programmatic **Return Values**.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="slide bg-slate-900">
+        <div class="max-w-5xl w-full flex flex-col md:flex-row gap-8 items-center h-full max-h-[85vh]">
+            <div class="w-full md:w-1/2 space-y-6">
+                <div class="flex items-center gap-3 text-amber-500 font-heading font-bold text-lg uppercase tracking-wide">
+                    <i class="fa-solid fa-fire-flame-curved"></i>
+                    <span>Brain Hook & Warm-Up</span>
+                </div>
+                <h2 class="text-4xl font-bold font-heading leading-tight">
+                    Have you met functions <span class="text-blue-400">before</span>?
+                </h2>
+                <p class="text-slate-300 leading-relaxed">
+                    You've been calling built-in Python logic actions since your very first line of code! Think about utilities like <code class="text-amber-400 bg-slate-800 px-1 rounded font-mono">print()</code>, <code class="text-amber-400 bg-slate-800 px-1 rounded font-mono">input()</code>, and <code class="text-amber-400 bg-slate-800 px-1 rounded font-mono">len()</code>.
+                </p>
+                <div class="bg-slate-800/40 p-4 rounded-xl border border-slate-700/60 space-y-2">
+                    <p class="text-sm font-semibold text-slate-400">Reflective Prompts:</p>
+                    <p class="text-slate-200 text-sm italic">"What do you think a function genuinely does inside structural memory architecture?"</p>
+                    <p class="text-slate-200 text-sm italic">"Why make your own instead of continuously writing code linear line-by-line?"</p>
+                </div>
+            </div>
+
+            <div class="w-full md:w-1/2 w-full flex flex-col justify-center">
+                <div class="code-container p-4 w-full">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        </div>
+                        <span class="text-xs text-slate-500 font-mono">recap_builtins.py</span>
+                    </div>
+                    <pre class="font-mono text-sm text-slate-300 space-y-1 overflow-x-auto p-2">
+<span class="text-slate-500"># Built-in helper mechanisms are predefined operations</span>
+my_name = <span class="text-emerald-400">input</span>(<span class="text-amber-300">"Enter name: "</span>)
+name_length = <span class="text-emerald-400">len</span>(my_name)
+
+<span class="text-slate-500"># Output results back instantly</span>
+<span class="text-emerald-400">print</span>(f<span class="text-amber-300">"Your name has {name_length} letters!"</span>)</pre>
+                </div>
+                <div class="mt-4 p-4 text-xs rounded-xl bg-blue-950/40 border border-blue-900/40 text-blue-300 flex gap-3">
+                    <i class="fa-solid fa-circle-info text-base mt-0.5"></i>
+                    <span><strong>The Big Idea:</strong> Functions pack a structural code statement block away and tag it with an explicit name handle so you can trigger that behavior effortlessly anywhere later.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="slide bg-slate-900">
+        <div class="max-w-5xl w-full space-y-6 flex flex-col justify-center h-full max-h-[85vh]">
+            <div class="text-center md:text-left space-y-2">
+                <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-500/20">Syntax Anatomy</span>
+                <h2 class="text-3xl md:text-4xl font-bold font-heading">Defining vs Calling Functions</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                <div class="space-y-4">
+                    <div class="bg-slate-800/60 p-5 rounded-xl border border-slate-700/60 space-y-3">
+                        <h3 class="font-bold text-lg text-white font-heading flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 text-xs flex items-center justify-center font-bold">1</span>
+                            Structural Definition
+                        </h3>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Initialize routines explicitly using the <span class="text-pink-400 font-mono font-bold">def</span> statement keyword token, provide a clean descriptive block handle, and instantiate trailing parentheses followed by a trailing <span class="text-amber-400 font-mono font-bold">:</span> separator.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-800/60 p-5 rounded-xl border border-slate-700/60 space-y-3">
+                        <h3 class="font-bold text-lg text-white font-heading flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 text-xs flex items-center justify-center font-bold">2</span>
+                            Functional Execution
+                        </h3>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Simply reference the precise defined routine handle anywhere downstream along your computational timeline followed by tracking execution parameters <span class="text-emerald-400 font-mono font-bold">()</span> to trigger the internal logic context block.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="code-container p-5 relative overflow-hidden">
+                    <div class="absolute right-3 top-3 text-xs font-mono text-slate-600 uppercase">Interactive Breakdown</div>
+                    <h4 class="text-xs font-mono text-slate-500 mb-4 border-b border-slate-800 pb-2">anatomy_of_a_function.py</h4>
+                    
+                    <div class="space-y-4 font-mono text-sm leading-relaxed">
+                        <div>
+                            <span class="text-pink-400 font-bold">def</span> <span class="text-blue-400 font-bold">greet</span>(): <span class="text-slate-500 ml-4"># &larr; Keyword 'def' + Unique Name + Colons</span>
+                            <div class="pl-6 border-l-2 border-slate-800 my-1 text-emerald-400">
+                                <span class="text-slate-500 text-xs italic block mb-0.5"># Crucial structural indentation block (4 spaces)</span>
+                                <span class="text-purple-400">print</span>(<span class="text-amber-300">"Hello, welcome to Python class!"</span>)
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-800/60">
+                            <span class="text-slate-500 text-xs block mb-1"># Triggering / Executing the block mechanism downstream:</span>
+                            <span class="text-blue-400 font-bold">greet</span>() <span class="text-slate-500 ml-4"># &larr; Calling target function engine</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 p-3 rounded bg-slate-950 text-xs text-slate-400 border border-slate-800">
+                        <strong class="text-slate-300">Pro-Tip:</strong> Python scripts ignore code blocks tucked within defined function templates until those routines are actively invoked by a execution call block.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="slide bg-slate-900">
+        <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch h-full max-h-[85vh] overflow-hidden py-4">
+            
+            <div class="lg:col-span-5 flex flex-col justify-center space-y-4 pr-2 overflow-y-auto custom-scrollbar">
+                <span class="text-xs font-bold text-blue-400 uppercase tracking-widest">Architectural Scale</span>
+                <h2 class="text-2xl md:text-3xl font-bold font-heading tracking-tight">Parameters vs Return Data</h2>
+                
+                <div class="space-y-3 text-sm">
+                    <div class="p-4 bg-slate-800/40 rounded-xl border border-slate-700/50">
+                        <span class="font-bold text-blue-400 block mb-1 font-heading"><i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>Parameters (Inputs)</span>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            Act as localized internal placeholder variables defined directly inside the definition parameters. They accept incoming data during execution.
+                        </p>
+                    </div>
+
+                    <div class="p-4 bg-slate-800/40 rounded-xl border border-slate-700/50">
+                        <span class="font-bold text-emerald-400 block mb-1 font-heading"><i class="fa-solid fa-arrow-right-from-bracket mr-2"></i>Return Statements (Outputs)</span>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            Pass computed results directly out of the local scope boundary back to the tracking script framework so it can be assigned inside expressions.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 flex items-start gap-2">
+                    <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+                    <span>Once a function triggers a <code class="bg-slate-950 text-pink-400 font-mono px-1 rounded">return</code> execution path, it halts operations instantly and exits.</span>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 flex flex-col code-container overflow-hidden h-full">
+                <div class="flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                        </div>
+                        <select id="code-selector" class="bg-slate-800 text-xs text-slate-300 rounded px-2.5 py-1 border border-slate-700 focus:outline-none focus:border-blue-500 font-mono">
+                            <option value="param">Example A: Parameter Scopes</option>
+                            <option value="return">Example B: Arithmetic Returns</option>
+                        </select>
+                    </div>
+                    <button onclick="runLiveCode()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold font-heading text-xs rounded-lg transition-all flex items-center gap-2 shadow-lg shadow-emerald-900/20">
+                        <i class="fa-solid fa-play"></i> Run Code
+                    </button>
+                </div>
+
+                <div class="flex-1 relative p-3 bg-[#070a13]">
+                    <textarea id="live-code-editor" class="w-full h-full bg-transparent text-slate-200 font-mono text-sm focus:outline-none resize-none selection:bg-blue-500/30 custom-scrollbar" spellcheck="false"></textarea>
+                </div>
+
+                <div class="h-1/3 border-t border-slate-800 flex flex-col bg-[#04060b]">
+                    <div class="px-4 py-1.5 bg-slate-900/60 text-xs text-slate-500 font-mono font-bold uppercase tracking-wider border-b border-slate-900">
+                        Console Terminal Output
+                    </div>
+                    <div id="live-terminal" class="flex-1 p-3 text-emerald-400 font-mono text-sm overflow-y-auto custom-scrollbar whitespace-pre-wrap">
+                        Click "Run Code" to compile environment output logs...
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="slide bg-slate-900">
+        <div class="max-w-5xl w-full flex flex-col justify-center space-y-6 h-full max-h-[85vh] overflow-y-auto custom-scrollbar py-4">
+            <div class="text-center space-y-2">
+                <span class="text-xs font-bold text-amber-400 uppercase tracking-widest bg-amber-400/10 px-3 py-1 rounded-full border border-amber-500/20">Live Workshop Workspace</span>
+                <h2 class="text-3xl font-bold font-heading">Guided Sandbox Activity: Multiplier Logic</h2>
+                <p class="text-slate-400 text-sm max-w-2xl mx-auto">
+                    Let's scale up step-by-step from static parameters to dynamic algebraic calculation handling.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+                <div class="md:col-span-5 bg-slate-800/50 p-5 rounded-2xl border border-slate-700/70 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-white font-heading flex items-center gap-2 text-base">
+                            <i class="fa-solid fa-list-check text-blue-400"></i>
+                            Your Instructions Sandbox
+                        </h3>
+                        <ol class="space-y-3 text-xs text-slate-300 pl-4 list-decimal marker:text-blue-400 marker:font-bold">
+                            <li>Define a unique function labeled <code class="bg-slate-900 px-1 py-0.5 rounded text-amber-300 font-mono">multiply_numbers</code>.</li>
+                            <li>Configure the parameter block signature to capture two inputs: <code class="bg-slate-900 px-1 py-0.5 rounded text-slate-300 font-mono">a</code> and <code class="bg-slate-900 px-1 py-0.5 rounded text-slate-300 font-mono">b</code>.</li>
+                            <li>Utilize the internal calculation rule token <code class="bg-slate-900 px-1 py-0.5 rounded text-pink-400 font-mono">return</code> to yield their product.</li>
+                            <li>Invoke your completed framework, trapping its returned evaluation within a tracking handle named <code class="bg-slate-900 px-1 py-0.5 rounded text-emerald-400 font-mono">result</code>.</li>
+                        </ol>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-700/60 text-xs text-slate-400 bg-slate-900/40 p-3 rounded-lg">
+                        <span class="font-bold text-slate-300 block mb-1"><i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i>Expected Output Profile:</span>
+                        <pre class="font-mono text-emerald-400 bg-black/40 p-1.5 rounded mt-1">Product result is: 35</pre>
+                    </div>
+                </div>
+
+                <div class="md:col-span-7 code-container p-4 flex flex-col justify-center">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3 text-xs text-slate-500 font-mono">
+                        <span>guided_practice.py</span>
+                        <span class="text-emerald-400"><i class="fa-solid fa-shield-halved"></i> Verified Syntax Pattern</span>
+                    </div>
+                    <pre class="font-mono text-xs md:text-sm text-slate-300 space-y-2 overflow-x-auto p-1 leading-relaxed">
+<span class="text-slate-500"># Step 1 & 2: Structural Initialization Block</span>
+<span class="text-pink-400 font-bold">def</span> <span class="text-blue-400 font-bold">multiply_numbers</span>(a, b):
+    <span class="text-slate-500"># Step 3: Compute internal algebraic math and pass out</span>
+    <span class="text-pink-400 font-bold">return</span> a * b
+
+<span class="text-slate-500"># Step 4: Call routine and pipe results back safely</span>
+result = multiply_numbers(<span class="text-amber-300">5</span>, <span class="text-amber-300">7</span>)
+
+<span class="text-slate-500"># Render out to target visibility display layout</span>
+<span class="text-purple-400">print</span>(f<span class="text-amber-300">"Product result is: {result}"</span>)</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="slide bg-slate-900">
+        <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch h-full max-h-[85vh] overflow-hidden py-2">
+            
+            <div class="lg:col-span-6 flex flex-col justify-center space-y-3 h-full overflow-y-auto pr-2 custom-scrollbar">
+                <div>
+                    <span class="text-xs font-bold text-red-400 uppercase tracking-widest"><i class="fa-solid fa-bug mr-1"></i>Debugging Target Arena</span>
+                    <h2 class="text-xl md:text-2xl font-bold font-heading">Interactive Bug Hunt</h2>
+                    <p class="text-slate-400 text-xs mt-0.5">Identify and click on exactly <strong>3 broken syntax lines</strong> lurking inside this code sequence.</p>
+                </div>
+
+                <div class="code-container overflow-hidden text-xs md:text-sm">
+                    <div class="bg-slate-950 px-4 py-2 text-slate-500 font-mono border-b border-slate-800 text-xs flex justify-between">
+                        <span>buggy_code_challenge.py</span>
+                        <span id="bug-counter" class="text-amber-400 font-bold">Found: 0 / 3</span>
+                    </div>
+                    <div class="font-mono divide-y divide-slate-900/40 p-1 bg-[#0b0f19]">
+                        <div data-is-bug="true" data-feedback="Error: Functions must initiate cleanly using 'def' keyword token, not 'function' block tag!" class="buggy-line p-2 text-slate-300 flex"><span class="w-6 text-slate-600 select-none text-xs">1</span><span class="text-red-400">function</span> calculate_total(price, tax)</div>
+                        <div data-is-bug="true" data-feedback="Error: Definition signature is lacking its mandatory execution trailing colon symbol (:)!" class="buggy-line p-2 text-slate-300 flex"><span class="w-6 text-slate-600 select-none text-xs">2</span>&nbsp;&nbsp;&nbsp;&nbsp;total_cost = price + tax</div>
+                        <div data-is-bug="false" class="buggy-line p-2 text-slate-300 flex"><span class="w-6 text-slate-600 select-none text-xs">3</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400 font-bold">return</span> total_cost</div>
+                        <div data-is-bug="true" data-feedback="Error: Positional arguments must be supplied inside parentheses call containers when invoking defined routines!" class="buggy-line p-2 text-slate-300 flex"><span class="w-6 text-slate-600 select-none text-xs">4</span>final_bill = calculate_total <span class="text-red-400">100, 15</span></div>
+                        <div data-is-bug="false" class="buggy-line p-2 text-slate-300 flex"><span class="w-6 text-slate-600 select-none text-xs">5</span><span class="text-purple-400">print</span>(final_bill)</div>
+                    </div>
+                    <div id="bug-feedback" class="p-2.5 bg-slate-950 text-xs text-slate-400 border-t border-slate-800 min-h-[40px] italic">
+                        Click on lines above to run validation scanner check checks...
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-6 flex flex-col justify-center space-y-4 h-full overflow-y-auto pl-2 custom-scrollbar">
+                <div>
+                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-widest"><i class="fa-solid fa-graduation-cap mr-1"></i>Knowledge Verification</span>
+                    <h2 class="text-xl md:text-2xl font-bold font-heading">Conceptual Checkpoints</h2>
+                </div>
+
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/60 space-y-2.5 text-xs">
+                    <p class="font-bold text-white text-xs">1. What keyword token does Python use to output a value back from a function scope?</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button onclick="checkMCQ(this, false, 'Incorrect. output is not a Python keyword.')" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded text-left transition-all text-slate-300">A) output</button>
+                        <button onclick="checkMCQ(this, true, 'Correct! return sends values back and exits.')" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded text-left transition-all text-slate-300">B) return</button>
+                        <button onclick="checkMCQ(this, false, 'Incorrect. send is not used for return values.')" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded text-left transition-all text-slate-300">C) send</button>
+                        <button onclick="checkMCQ(this, false, 'Incorrect. print displays text but does not return data.')" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded text-left transition-all text-slate-300">D) print</button>
+                    </div>
+                    <p class="mcq-feedback text-[11px] hidden font-semibold"></p>
+                </div>
+
+                <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700/60 space-y-2.5 text-xs">
+                    <p class="font-bold text-white text-xs">2. What happens if you define a function but never write a call for it?</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button onclick="checkMCQ(this, false, 'Incorrect. Python will not crash.')" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded text-left transition-all text-slate-300">A) Triggers a syntax error compiler crash</button>
+                        <button onclick="checkMCQ(this, true, 'Correct! The code block is stored but never executed.')" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded text-left transition-all text-slate-300">B) It is stored in memory but never executes</button>
+                        <button onclick="checkMCQ(this, false, 'Incorrect. It runs exactly zero times.')" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded text-left transition-all text-slate-300">C) It auto-executes once at file initialization</button>
+                        <button onclick="checkMCQ(this, false, 'Incorrect. It does not run at all.')" class="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded text-left transition-all text-slate-300">D) It runs recursively until system memory loops</button>
+                    </div>
+                    <p class="mcq-feedback text-[11px] hidden font-semibold"></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="slide bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950">
+        <div class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch h-full max-h-[85vh] overflow-y-auto custom-scrollbar py-4">
+            
+            <div class="lg:col-span-7 flex flex-col justify-center space-y-4 pr-2">
+                <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-700 shadow-2xl space-y-3">
+                    <div class="flex items-center gap-2 text-emerald-400 font-heading font-bold text-base">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <h3>Mini-Project: Factorial Calculator</h3>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Implement a complete calculation script using iterative loop algorithms encapsulated inside a targeted calculation architecture.
+                    </p>
+                    <div class="code-container p-3 bg-slate-950 text-xs">
+                        <pre class="font-mono text-slate-300"><span class="text-pink-400 font-bold">def</span> <span class="text-blue-400 font-bold">factorial</span>(n):
+    result = <span class="text-amber-300">1</span>
+    <span class="text-pink-400 font-bold">for</span> i <span class="text-pink-400 font-bold">in</span> <span class="text-purple-400">range</span>(<span class="text-amber-300">1</span>, n + <span class="text-amber-300">1</span>):
+        result *= i
+    <span class="text-pink-400 font-bold">return</span> result
+
+<span class="text-purple-400">print</span>(factorial(<span class="text-amber-300">5</span>)) <span class="text-slate-500"># Compiles output logic: 120</span></pre>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/40 text-xs space-y-2">
+                    <span class="font-bold text-amber-400 font-heading block"><i class="fa-solid fa-house-laptop mr-1"></i> Homework Challenges</span>
+                    <ul class="list-disc pl-4 space-y-1 text-slate-300">
+                        <li>Write a custom function to return the area of a rectangle given length and width parameters.</li>
+                        <li><strong class="text-amber-300">Challenge Rank:</strong> Create a function to find and return the largest of three numbers.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 flex flex-col justify-center pl-2">
+                <div class="bg-slate-900/90 p-5 rounded-2xl border-2 border-blue-500/30 shadow-2xl space-y-4">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest block">Instant Assessment</span>
+                        <h4 class="font-bold font-heading text-white text-base">Fill-in-the-Blank Check</h4>
+                        <p class="text-slate-400 text-xs">Complete the code below to call the function correctly:</p>
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 font-mono text-xs text-slate-300 space-y-2">
+                        <div>
+                            <span class="text-pink-400">def</span> <span class="text-blue-400">calc_square</span>(num):
+                            <div class="pl-4 text-pink-400">return <span class="text-slate-300">num * num</span></div>
+                        </div>
+                        <div class="pt-2 border-t border-slate-800/80 flex items-center gap-2 flex-wrap">
+                            <span class="text-slate-400"># Call function with 4:</span>
+                            <span>answer = </span>
+                            <input type="text" id="assignment-input" placeholder="???" class="bg-slate-900 border border-slate-700 rounded px-2 py-0.5 w-32 focus:outline-none focus:border-blue-500 font-mono text-center text-amber-300 placeholder-slate-600 font-bold" autocomplete="off" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <button onclick="verifyAssignment()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold font-heading text-xs rounded-xl transition-all shadow-lg shadow-blue-950/50 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-signature"></i> Verify Assignment
+                    </button>
+
+                    <div id="assignment-feedback" class="p-3 rounded-xl text-xs text-center font-medium hidden"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div class="progress-bar" id="progress"></div>
+<div class="nav-hint">Use <span class="key-box">&larr;</span><span class="key-box">&rarr;</span> or <span class="key-box">Space</span> to navigate</div>
+
+
+<script>
+    // Slide Management Configuration
+    const slides = document.querySelectorAll('.slide');
+    const progress = document.getElementById('progress');
+    const counter = document.getElementById('slide-counter');
+    let currentSlideIndex = 0;
+
+    function updateSlides() {
+        slides.forEach((slide, idx) => {
+            slide.classList.remove('active', 'prev');
+            if (idx === currentSlideIndex) {
+                slide.classList.add('active');
+            } else if (idx < currentSlideIndex) {
+                slide.classList.add('prev');
+            }
+        });
+
+        // Track system layout metrics updates
+        counter.innerText = `${currentSlideIndex + 1} / ${slides.length}`;
+        const progressPercent = ((currentSlideIndex + 1) / slides.length) * 100;
+        progress.style.width = `${progressPercent}%`;
+    }
+
+    function nextSlide() {
+        if (currentSlideIndex < slides.length - 1) {
+            currentSlideIndex++;
+            updateSlides();
+        }
+    }
+
+    function prevSlide() {
+        if (currentSlideIndex > 0) {
+            currentSlideIndex--;
+            updateSlides();
+        }
+    }
+
+    // Keyboard Hook Listeners
+    window.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevSlide();
+        }
+    });
+
+
+    // Mock Live Code Runner Database Storage
+    const codeTemplates = {
+        param: `def greet_user(name):\n    print(f"Hello, {name}! Welcome to Python.")\n\ngreet_user("Alex")`,
+        return: `def add_numbers(a, b):\n    return a + b\n\nresult = add_numbers(5, 7)\nprint(result)`
+    };
+
+    const editor = document.getElementById('live-code-editor');
+    const selector = document.getElementById('code-selector');
+    const terminal = document.getElementById('live-terminal');
+
+    selector.addEventListener('change', (e) => {
+        editor.value = codeTemplates[e.target.value];
+        terminal.innerText = 'Click "Run Code" to compile environment output logs...';
+    });
+
+    // Populate initial text editor block context matrix
+    editor.value = codeTemplates.param;
+
+    function parsePrintStatements(code) {
+        let outputs = [];
+        
+        // Match function definitions and tracks context states
+        const hasGreetUser = code.includes('def greet_user');
+        const hasAddNumbers = code.includes('def add_numbers');
+        
+        // Simulating functional compilation execution
+        if (hasGreetUser) {
+            const match = code.match(/greet_user\s*\(\s*["'](.*?)["']\s*\)/);
+            if (match && match[1]) {
+                outputs.push(`Hello, ${match[1]}! Welcome to Python.`);
+            } else if (code.includes('greet_user()')) {
+                outputs.push("TypeError: greet_user() missing 1 required positional argument: 'name'");
+            } else {
+                outputs.push("Routines defined. Invoke via code logic to view logs.");
+            }
+        } else if (hasAddNumbers) {
+            const match = code.match(/add_numbers\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)/);
+            if (match && match[1] && match[2]) {
+                const sum = parseInt(match[1]) + parseInt(match[2]);
+                if (code.includes('print(result)') || code.includes('print(')) {
+                    outputs.push(sum.toString());
+                } else {
+                    outputs.push("Calculation finished successfully (Exit status code 0).");
+                }
+            } else {
+                outputs.push("Routines compiled cleanly.");
+            }
+        } else {
+            // General basic fallback logic parser
+            const printMatches = code.matchAll(/print\s*\(\s*f?["'](.*?)["']\s*\)/g);
+            for (const match of printMatches) {
+                outputs.push(match[1]);
+            }
+        }
+        
+        return outputs.length > 0 ? outputs.join('\n') : "Code executed with zero returned print records.";
+    }
+
+    function runLiveCode() {
+        terminal.innerText = "Compiling and executing environment blocks...\n";
+        setTimeout(() => {
+            try {
+                const results = parsePrintStatements(editor.value);
+                terminal.innerText = results;
+            } catch (err) {
+                terminal.innerText = "SyntaxError: Malformed code structures detected.";
+            }
+        }, 400);
+    }
+
+
+    // Interactive Bug Hunt Tracking Engine
+    let discoveredBugsCount = 0;
+    const maxBugsTarget = 3;
+    const bugCounterText = document.getElementById('bug-counter');
+    const bugFeedbackArea = document.getElementById('bug-feedback');
+
+    document.querySelectorAll('.buggy-line').forEach(line => {
+        line.addEventListener('click', function() {
+            const isBuggy = this.getAttribute('data-is-bug') === 'true';
+            
+            if (isBuggy) {
+                if (!this.classList.contains('selected-bug')) {
+                    this.classList.add('selected-bug');
+                    discoveredBugsCount++;
+                    bugCounterText.innerText = `Found: ${discoveredBugsCount} / ${maxBugsTarget}`;
+                    bugFeedbackArea.innerText = this.getAttribute('data-feedback');
+                    bugFeedbackArea.className = "p-2.5 bg-red-950/40 text-xs text-red-300 border-t border-red-900/40 min-h-[40px] italic animate-pulse";
+                    
+                    if (discoveredBugsCount === maxBugsTarget) {
+                        bugCounterText.innerText = "Cleared! 3 / 3";
+                        bugCounterText.className = "text-emerald-400 font-bold font-heading animate-bounce";
+                        bugFeedbackArea.innerText = "Outstanding! You've purged all functional structural bug errors successfully.";
+                        bugFeedbackArea.className = "p-2.5 bg-emerald-950/50 text-xs text-emerald-400 border-t border-emerald-900/40 min-h-[40px] font-bold";
+                    }
+                }
+            } else {
+                this.classList.add('selected-clean');
+                bugFeedbackArea.innerText = "Line is clean! No compilation issues or logical structural bugs here.";
+                bugFeedbackArea.className = "p-2.5 bg-emerald-950/20 text-xs text-slate-400 border-t border-slate-800 min-h-[40px]";
+                setTimeout(() => this.classList.remove('selected-clean'), 800);
+            }
+        });
+    });
+
+
+    // Multiple Choice Question Verification Engine
+    function checkMCQ(button, isCorrect, feedbackMessage) {
+        const parentContainer = button.closest('.space-y-2.5');
+        const feedbackBlock = parentContainer.querySelector('.mcq-feedback');
+        const buttons = parentContainer.querySelectorAll('button');
+
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            btn.className = "p-2 bg-slate-900/40 border border-slate-800 text-slate-600 text-left rounded text-xs pointer-events-none";
+        });
+
+        if (isCorrect) {
+            button.className = "p-2 bg-emerald-600/30 border-2 border-emerald-500 text-emerald-300 font-bold text-left rounded text-xs";
+            feedbackBlock.className = "mcq-feedback text-[11px] font-semibold text-emerald-400 mt-2 block";
+        } else {
+            button.className = "p-2 bg-red-600/30 border-2 border-red-500 text-red-300 font-bold text-left rounded text-xs";
+            feedbackBlock.className = "mcq-feedback text-[11px] font-semibold text-red-400 mt-2 block";
+            
+            // Highlight the correct alternative
+            buttons.forEach(btn => {
+                if(btn.innerText.includes('B) return') || btn.innerText.includes('B) It is stored in memory')) {
+                    btn.className = "p-2 bg-emerald-900/40 border border-emerald-700/60 text-emerald-400 text-left rounded text-xs font-semibold";
+                }
+            });
+        }
+        feedbackBlock.innerText = feedbackMessage;
+    }
+
+
+    // Live Assignment Verification Routine Engine
+    function verifyAssignment() {
+        const userInput = document.getElementById('assignment-input').value.trim();
+        const feedbackArea = document.getElementById('assignment-feedback');
+        
+        // Clean text spaces pattern validation
+        const normalizedInput = userInput.replace(/\s+/g, '');
+        const targetPattern = "calc_square(4)";
+
+        feedbackArea.removeAttribute('hidden');
+        feedbackArea.style.display = "block";
+
+        if (normalizedInput === targetPattern) {
+            feedbackArea.innerText = "Excellent Job! You successfully called the function container passing down an argument value.";
+            feedbackArea.className = "p-3 rounded-xl text-xs text-center font-bold bg-emerald-950/80 border border-emerald-800 text-emerald-400 animate-bounce";
+        } else if (normalizedInput.includes("calc_square")) {
+            feedbackArea.innerText = "Close! Make sure you supply 4 inside the functional input execution tracking parentheses context.";
+            feedbackArea.className = "p-3 rounded-xl text-xs text-center font-medium bg-amber-950/80 border border-amber-800 text-amber-400";
+        } else {
+            feedbackArea.innerText = "Incorrect syntax format rule match. Remember to use: calc_square(4) to invoke that block routine.";
+            feedbackArea.className = "p-3 rounded-xl text-xs text-center font-medium bg-red-950/80 border border-red-900 text-red-400";
+        }
+    }
+
+    // Initialize slide metrics components layout at startup
+    updateSlides();
+</script>
+
+</body>
+</html>

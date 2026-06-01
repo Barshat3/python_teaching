@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level 4: Conditional Statements & Logical Operators</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0B0F19;
+            --card-bg: #131A26;
+            --accent-blue: #3B82F6;
+            --accent-green: #10B981;
+            --accent-purple: #8B5CF6;
+            --accent-coral: #EF4444;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1, h2, h3, .font-heading {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Slide Management */
+        .slide {
+            display: none;
+            min-height: 100vh;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom UI Elements */
+        #slide-counter {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(19, 26, 38, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: bold;
+            z-index: 50;
+            backdrop-filter: blur(8px);
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            width: 0%;
+            transition: width 0.3s ease;
+            z-index: 50;
+        }
+
+        .nav-hint {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            z-index: 40;
+            background: rgba(11, 15, 25, 0.6);
+            padding: 0.25rem 0.7rem;
+            border-radius: 6px;
+        }
+
+        .key-box {
+            background: #1F2937;
+            border: 1px solid #374151;
+            border-radius: 4px;
+            padding: 0.1rem 0.4rem;
+            margin: 0 0.2rem;
+            font-weight: bold;
+        }
+
+        /* Terminal styling */
+        .terminal-container {
+            background: #0D1117;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        /* Bug Hunt Toggle States */
+        .buggy-line {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        .buggy-line:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .buggy-line.flagged {
+            background: rgba(239, 68, 68, 0.25);
+            border-left: 4px solid var(--accent-coral);
+        }
+        .buggy-line.correctly-flagged {
+            background: rgba(16, 185, 129, 0.25);
+            border-left: 4px solid var(--accent-green);
+        }
+
+        /* MCQ styling states */
+        .mcq-option {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-[#0B0F19] text-gray-100 min-h-screen flex flex-col justify-between">
+
+<div id="slide-counter">1 / 7</div>
+
+<div id="presentation-container" class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex items-center justify-center">
+    
+    <section class="slide active flex-col justify-center items-center text-center w-full space-y-8">
+        <div class="space-y-4">
+            <span class="px-4 py-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full text-sm font-semibold tracking-wider uppercase font-heading">
+                Class 4 &bull; Computer Science
+            </span>
+            <h1 class="text-5xl sm:text-7xl font-bold tracking-tight text-white bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 py-2">
+                Conditional Statements
+            </h1>
+            <p class="text-xl sm:text-2xl text-gray-400 max-w-3xl mx-auto font-light">
+                Teaching computers how to make real-world decisions using <code class="code-font text-blue-400 bg-blue-950/40 px-2 py-0.5 rounded">if</code>, <code class="code-font text-purple-400 bg-purple-950/40 px-2 py-0.5 rounded">elif</code>, and <code class="code-font text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded">else</code>.
+            </p>
+        </div>
+
+        <div class="w-full max-w-2xl bg-[#131A26] border border-gray-800 rounded-2xl p-6 shadow-xl text-left mt-8">
+            <h3 class="text-lg font-bold text-gray-200 flex items-center gap-2 mb-4 font-heading border-b border-gray-800 pb-2">
+                <i class="fa-solid font-heading text-blue-500 fa-bullseye"></i> Lesson Objectives
+            </h3>
+            <ul class="space-y-3 text-gray-300">
+                <li class="flex items-start gap-3">
+                    <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                    <span>Master the core syntax framework of structural path decisions in Python execution.</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                    <span>Apply compound evaluation parameters using the logical operators: <code class="code-font text-amber-400 bg-gray-900 px-1.5 rounded">and</code>, <code class="code-font text-amber-400 bg-gray-900 px-1.5 rounded">or</code>, <code class="code-font text-amber-400 bg-gray-900 px-1.5 rounded">not</code>.</span>
+                </li>
+                <li class="flex items-start gap-3">
+                    <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                    <span>Construct a fully functional <strong>Competition Eligibility Checker</strong> application.</span>
+                </li>
+            </ul>
+        </div>
+        <div class="pt-4 text-sm text-gray-500 animate-pulse">
+            Press <span class="key-box">&rarr;</span> or <span class="key-box">Space</span> to begin execution
+        </div>
+    </section>
+
+    <section class="slide flex-col justify-center w-full max-w-5xl mx-auto space-y-8">
+        <div class="border-l-4 border-purple-500 pl-4">
+            <h2 class="text-3xl font-bold text-white tracking-wide uppercase font-heading">01. Warm-Up & Brainstorm</h2>
+            <p class="text-gray-400">Recapping data representation & planning programmatic branching paths</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+            <div class="bg-[#131A26] border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-3 text-purple-400 mb-4">
+                        <i class="fa-solid fa-brain text-xl"></i>
+                        <h3 class="text-xl font-bold font-heading">Mental Model Exercise</h3>
+                    </div>
+                    <p class="text-gray-300 mb-6 leading-relaxed">
+                        Every single day, your brain handles structural execution paths without realizing it. Consider the process of evaluation for driving permissions:
+                    </p>
+                    <div class="space-y-3 text-sm">
+                        <div class="p-3 bg-gray-900/60 rounded-lg border border-gray-800 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center font-bold">1</span>
+                            <span class="text-gray-300">Evaluate condition criteria state (<code class="code-font text-blue-400">age &gt;= 16</code>)</span>
+                        </div>
+                        <div class="p-3 bg-gray-900/60 rounded-lg border border-gray-800 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 flex items-center justify-center font-bold">2</span>
+                            <span class="text-gray-300">If assertion resolves true &rarr; Dispatch permit execution</span>
+                        </div>
+                        <div class="p-3 bg-gray-900/60 rounded-lg border border-gray-800 flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">3</span>
+                            <span class="text-gray-300">If false &rarr; Halt operation, show restriction feedback</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-gray-800/60 text-sm text-gray-400">
+                    <span class="text-purple-400 font-bold">Discussion Question:</span> "What kind of data types do conditional choices produce under the hood?"
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-br from-[#181E2E] to-[#131A26] border border-gray-800 rounded-2xl p-6 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-200 mb-4 font-heading flex items-center gap-2">
+                        <i class="fa-solid fa-toggle-on text-emerald-400"></i> Interactive Condition Preview
+                    </h3>
+                    <p class="text-sm text-gray-400 mb-4">
+                        Toggle simulated engine conditions below to observe structural branching changes:
+                    </p>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-2">Configure Student Variable Age Instance:</label>
+                            <div class="flex items-center gap-4">
+                                <input type="range" id="hook-age-slider" min="5" max="25" value="12" class="w-full accent-blue-500 bg-gray-900 rounded-lg appearance-none h-2">
+                                <span id="hook-age-val" class="font-bold text-xl text-blue-400 min-w-[2.5rem] text-center code-font">12</span>
+                            </div>
+                        </div>
+                        <div class="bg-[#0D1117] border border-gray-800 rounded-xl p-4 code-font text-xs space-y-1">
+                            <div><span class="text-pink-400">if</span> age &gt;= <span class="text-purple-400">18</span>:</div>
+                            <div class="pl-4 text-gray-500">// Branch 1 Route bypassed</div>
+                            <div><span class="text-pink-400">elif</span> age &gt;= <span class="text-purple-400">16</span>:</div>
+                            <div class="pl-4 text-gray-500">// Branch 2 Route bypassed</div>
+                            <div><span class="text-pink-400">else</span>:</div>
+                            <div class="pl-4 text-emerald-400" id="hook-branch-active">print("Execution path matches target: Restrict Activity")</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-blue-950/20 border border-blue-900/30 text-blue-300 text-xs rounded-xl p-3 flex items-start gap-2.5 mt-4">
+                    <i class="fa-solid fa-circle-info mt-0.5"></i>
+                    <span>Real-world digital operations completely rely on logical forks to adapt applications to live context variables.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide flex-col justify-center w-full max-w-5xl mx-auto space-y-6">
+        <div class="border-l-4 border-blue-500 pl-4">
+            <h2 class="text-3xl font-bold text-white tracking-wide uppercase font-heading">02. Anatomy of Conditionals</h2>
+            <p class="text-gray-400">Structural composition rules, whitespace syntax boundaries, and execution tokens</p>
+        </div>
+
+        <div class="bg-[#131A26] border border-gray-800 rounded-2xl p-6 space-y-6">
+            <h3 class="text-xl font-bold text-gray-200 font-heading">Syntax Breakdown Blueprint</h3>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-[#0D1117] p-6 rounded-xl border border-gray-800 relative overflow-x-auto">
+                    <div class="code-font text-base sm:text-lg leading-relaxed whitespace-pre text-gray-300">
+<div><span class="bg-pink-500/20 text-pink-400 px-1 rounded font-bold" title="Keyword token initiating structure">if</span> <span class="bg-blue-500/20 text-blue-400 px-1 rounded font-bold" title="Expression evaluating to a Boolean state">condition</span><span class="text-amber-400 font-bold bg-amber-500/20 px-1 rounded" title="Mandatory colon finalizing block entry declaration">:</span></div><div class="text-gray-500 select-none">    <span class="bg-purple-500/20 text-purple-400 border border-purple-500/40 px-1 rounded text-xs">4 Spaces Indentation (Crucial!)</span></div><div class="pl-8 text-emerald-400 bg-emerald-950/20 rounded inline-block w-fit pr-2"># Execution path fires if True</div>
+<div class="mt-4"><span class="bg-pink-500/20 text-pink-400 px-1 rounded font-bold">elif</span> <span class="bg-blue-500/20 text-blue-400 px-1 rounded font-bold">another_condition</span><span class="text-amber-400 font-bold bg-amber-500/20 px-1 rounded">:</span></div><div class="pl-8 text-emerald-400 bg-emerald-950/20 rounded inline-block w-fit pr-2"># Alternate route evaluation</div>
+<div class="mt-4"><span class="bg-pink-500/20 text-pink-400 px-1 rounded font-bold">else</span><span class="text-amber-400 font-bold bg-amber-500/20 px-1 rounded">:</span></div><div class="pl-8 text-emerald-400 bg-emerald-950/20 rounded inline-block w-fit pr-2"># Fallback executed if nothing matches</div></div>
+                </div>
+
+                <div class="space-y-4">
+                    <h4 class="text-sm font-bold tracking-wider text-gray-400 uppercase font-heading">Core Components</h4>
+                    <div class="space-y-2 text-xs">
+                        <div class="p-2.5 bg-gray-900/80 rounded-lg border-l-4 border-pink-400">
+                            <span class="font-bold text-pink-400 block mb-0.5">Control Keywords</span>
+                            Defines structure entries (<code class="code-font">if</code> / <code class="code-font">elif</code> / <code class="code-font">else</code>).
+                        </div>
+                        <div class="p-2.5 bg-gray-900/80 rounded-lg border-l-4 border-blue-400">
+                            <span class="font-bold text-blue-400 block mb-0.5">Evaluation Statement</span>
+                            Expressions yielding binary <code class="code-font text-purple-400">True</code> or <code class="code-font text-purple-400">False</code> parameters.
+                        </div>
+                        <div class="p-2.5 bg-gray-900/80 rounded-lg border-l-4 border-amber-400">
+                            <span class="font-bold text-amber-400 block mb-0.5">Block Terminal (:)</span>
+                            Signals block entry point to the Python parsing engine.
+                        </div>
+                        <div class="p-2.5 bg-gray-900/80 rounded-lg border-l-4 border-purple-400">
+                            <span class="font-bold text-purple-400 block mb-0.5">Indentation Guard</span>
+                            Exactly 4 spaces. Missing indentation causes immediate system-level errors.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-yellow-950/20 border border-yellow-900/40 rounded-xl flex items-start gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-yellow-500 text-lg mt-0.5"></i>
+                <div>
+                    <h4 class="text-sm font-bold text-yellow-400 font-heading">The Indentation Trap Danger!</h4>
+                    <p class="text-xs text-gray-400 mt-1 leading-relaxed">
+                        Unlike languages using curly braces <code class="code-font">{}</code>, Python completely relies on space structures. Shifting block indents changes when, where, and if code sequences are read.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide flex-col justify-center w-full max-w-6xl mx-auto space-y-6">
+        <div class="border-l-4 border-emerald-500 pl-4">
+            <h2 class="text-3xl font-bold text-white tracking-wide uppercase font-heading">03. Logic Composition & Live Lab</h2>
+            <p class="text-gray-400">Interlocking complex requirements with logical operator modifiers</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            
+            <div class="lg:col-span-5 space-y-4 flex flex-col justify-between">
+                <div class="bg-[#131A26] border border-gray-800 rounded-2xl p-5 space-y-4">
+                    <h3 class="text-md font-bold text-gray-300 uppercase tracking-wider font-heading"><i class="fa-solid fa-square-root-variable text-blue-400 mr-1"></i> Logical Operators Guide</h3>
+                    
+                    <div class="space-y-2.5">
+                        <div class="p-3 bg-[#0D1117] rounded-xl border border-gray-800/80">
+                            <div class="flex items-center justify-between mb-1"><span class="code-font text-blue-400 font-bold">and</span> <span class="text-[10px] bg-blue-950 px-1.5 rounded text-blue-300 font-mono">STRICT MATCH</span></div>
+                            <p class="text-xs text-gray-400">Returns <code class="code-font text-purple-400">True</code> only if <strong>all</strong> evaluation expressions evaluate to True simultaneously.</p>
+                        </div>
+                        <div class="p-3 bg-[#0D1117] rounded-xl border border-gray-800/80">
+                            <div class="flex items-center justify-between mb-1"><span class="code-font text-purple-400 font-bold">or</span> <span class="text-[10px] bg-purple-950 px-1.5 rounded text-purple-300 font-mono">ANY MATCH</span></div>
+                            <p class="text-xs text-gray-400">Returns <code class="code-font text-purple-400">True</code> if <strong>at least one</strong> individual condition evaluation is satisfied.</p>
+                        </div>
+                        <div class="p-3 bg-[#0D1117] rounded-xl border border-gray-800/80">
+                            <div class="flex items-center justify-between mb-1"><span class="code-font text-pink-400 font-bold">not</span> <span class="text-[10px] bg-pink-950 px-1.5 rounded text-pink-300 font-mono">INVERT VALUE</span></div>
+                            <p class="text-xs text-gray-400">Reverses binary parameter logic. Switches True completely into False states.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900/40 border border-gray-800 rounded-xl p-4">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-2 font-heading">Template Evaluation Samples</span>
+                    <div class="space-y-1.5 code-font text-xs">
+                        <div class="text-gray-400"><span class="text-gray-500"># Compound range assertions:</span></div>
+                        <div class="bg-gray-950 p-2 rounded border border-gray-800 text-gray-300">
+                            age = <span class="text-purple-400">20</span><br>
+                            <span class="text-pink-400">if</span> age &gt;= <span class="text-purple-400">18</span> <span class="text-blue-400">and</span> age &lt; <span class="text-purple-400">25</span>:<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-amber-400">print</span>(<span class="text-emerald-400">"You are a young adult."</span>)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 flex flex-col">
+                <div class="terminal-container flex-grow flex flex-col">
+                    <div class="bg-[#161B22] px-4 py-3 border-b border-gray-800 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500/70 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500/70 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500/70 inline-block"></span>
+                            <span class="text-xs text-gray-400 font-mono ml-2"><i class="fa-brands fa-python text-blue-400 mr-1"></i> live_code_environment.py</span>
+                        </div>
+                        <span class="text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-900/50">Active Interactive Sandbox</span>
+                    </div>
+                    
+                    <div class="p-4 bg-[#0D1117] font-mono text-sm flex-grow">
+                        <label class="block text-xs text-gray-500 mb-1 font-sans">Modify target engine parameter arrays below directly:</label>
+                        <textarea id="live-code-input" class="w-full h-44 bg-[#090D14] text-emerald-400 p-3 rounded-lg border border-gray-800 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 code-font text-xs sm:text-sm resize-none" spellcheck="false"># Live Sandboxed Script Environment
+age = 16
+
+if age >= 18:
+    print("You can vote.")
+elif age >= 16:
+    print("You can drive but not vote.")
+else:
+    print("You are too young to vote or drive.")</textarea>
+                    </div>
+
+                    <div class="p-3 bg-[#161B22] border-t border-gray-800 flex items-center justify-between">
+                        <span class="text-xs text-gray-400"><i class="fa-solid fa-terminal mr-1 text-gray-500"></i> Code Execution Space</span>
+                        <button id="run-sandbox-btn" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-xs font-bold font-heading flex items-center gap-2 transition shadow-lg shadow-emerald-900/20">
+                            <i class="fa-solid fa-play"></i> Execute Code Sequence
+                        </button>
+                    </div>
+
+                    <div class="bg-black p-4 min-h-[5.5rem] code-font text-xs text-gray-300 border-t border-gray-900 flex flex-col justify-start">
+                        <span class="text-gray-600 select-none text-[10px] uppercase tracking-wider font-sans block mb-1">Terminal Stdout Result Output:</span>
+                        <div id="sandbox-output-log" class="text-emerald-400 font-bold whitespace-pre-wrap">&gt;&gt; Press compile button execution sequence output window ready...</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="slide flex-col justify-center w-full max-w-5xl mx-auto space-y-6">
+        <div class="border-l-4 border-amber-500 pl-4">
+            <h2 class="text-3xl font-bold text-white tracking-wide uppercase font-heading">04. Structured Mission Activity</h2>
+            <p class="text-gray-400">Step-by-step logic assertion construction requirements</p>
+        </div>
+
+        <div class="bg-[#131A26] border border-gray-800 rounded-2xl p-6 space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-800 pb-4">
+                <div class="flex items-center gap-3">
+                    <span class="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20"><i class="fa-solid fa-laptop-code text-2xl"></i></span>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-200 font-heading">Activity Assignment Checkpoint</h3>
+                        <p class="text-xs text-gray-400">Goal: Formulate an evaluation program evaluating integer variable numerical parameters</p>
+                    </div>
+                </div>
+                <div class="px-3 py-1 bg-amber-950 text-amber-300 text-xs font-semibold rounded-full border border-amber-900 font-mono">
+                    Time Budget Allocation: 15 Mins
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h4 class="text-sm font-bold tracking-wider text-gray-400 uppercase font-heading">Execution Step Matrix Rules</h4>
+                    
+                    <div class="space-y-3">
+                        <div class="flex gap-3">
+                            <span class="w-5 h-5 rounded bg-gray-800 text-gray-400 flex items-center justify-center font-mono text-xs font-bold mt-0.5">1</span>
+                            <p class="text-sm text-gray-300"><strong class="text-white">Collect Input Parameter Values:</strong> Establish an explicit wrapper using <code class="code-font text-blue-400">int(input())</code> configurations.</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="w-5 h-5 rounded bg-gray-800 text-gray-400 flex items-center justify-center font-mono text-xs font-bold mt-0.5">2</span>
+                            <p class="text-sm text-gray-300"><strong class="text-white">Implement Level Check Limits:</strong> Construct positive values validation tracking with standard <code class="code-font text-purple-400">&gt; 0</code> assertion checks.</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="w-5 h-5 rounded bg-gray-800 text-gray-400 flex items-center justify-center font-mono text-xs font-bold mt-0.5">3</span>
+                            <p class="text-sm text-gray-300"><strong class="text-white">Establish Neutral Zero Floor:</strong> Catch perfect target match parameters explicitly utilizing equality structures (<code class="code-font text-purple-400">== 0</code>).</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="w-5 h-5 rounded bg-gray-800 text-gray-400 flex items-center justify-center font-mono text-xs font-bold mt-0.5">4</span>
+                            <p class="text-sm text-gray-300"><strong class="text-white">Challenge Enhancement Variant:</strong> Modify logic chains to also verify if the payload is even or odd using modulo operators (<code class="code-font text-amber-400">% 2 == 0</code>).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-[#0D1117] rounded-xl border border-gray-800 p-4 space-y-4">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block font-heading"><i class="fa-solid fa-code text-amber-400 mr-1"></i> Reference Implementation Blueprint</span>
+                    
+                    <div class="code-font text-xs text-gray-400 space-y-1 bg-gray-950 p-3 rounded-lg border border-gray-900">
+                        <div>number = <span class="text-amber-400">int</span>(<span class="text-amber-400">input</span>(<span class="text-emerald-400">"Enter a number: "</span>))</div>
+                        <div class="mt-2"><span class="text-pink-400">if</span> number &gt; <span class="text-purple-400">0</span>:</div>
+                        <div class="pl-4 text-gray-300">print(<span class="text-emerald-400">"The number is positive."</span>)</div>
+                        <div><span class="text-pink-400">elif</span> number == <span class="text-purple-400">0</span>:</div>
+                        <div class="pl-4 text-gray-300">print(<span class="text-emerald-400">"The number is zero."</span>)</div>
+                        <div><span class="text-pink-400">else</span>:</div>
+                        <div class="pl-4 text-gray-300">print(<span class="text-emerald-400">"The number is negative."</span>)</div>
+                    </div>
+
+                    <div class="p-3 bg-blue-950/20 border border-blue-900/30 text-blue-300 text-xs rounded-lg">
+                        <strong>Teacher Tip:</strong> Remind students that <code class="code-font text-white">=</code> is for assignment, while <code class="code-font text-white">==</code> checks for equality!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="slide flex-col justify-center w-full max-w-5xl mx-auto space-y-8">
+        <div class="border-l-4 border-coral-500 pl-4 border-red-500">
+            <h2 class="text-3xl font-bold text-white tracking-wide uppercase font-heading">05. Evaluation Arena Checks</h2>
+            <p class="text-gray-400">Identify structural bug targets and validate concept comprehension answers</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+            
+            <div class="bg-[#131A26] border border-gray-800 rounded-2xl p-6 flex flex-col justify-between space-y-4">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-bold font-heading text-red-400 flex items-center gap-2">
+                            <i class="fa-solid fa-bug animate-bounce"></i> Interactive Bug Hunt
+                        </h3>
+                        <span class="text-xs bg-red-950 text-red-400 border border-red-900 font-mono px-2 py-0.5 rounded-full font-bold">
+                            Find <span id="bugs-remaining-counter">3</span> Hidden Bugs
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4">
+                        Click directly on lines that contain syntax or logical errors to flag them:
+                    </p>
+
+                    <div class="bg-[#0D1117] rounded-xl border border-gray-800 overflow-hidden code-font text-xs sm:text-sm shadow-inner select-none">
+                        <div class="buggy-line py-2 px-3 border-b border-gray-900/40 flex items-center gap-3 text-gray-400" data-line-index="0" data-is-bug="true" data-feedback="Bug Found! In Python, conditional input parameters must be manually wrapped in numerical cast wrappers like int() to perform mathematical assertions safely.">
+                            <span class="text-gray-600 font-mono w-4 block text-right">1</span>
+                            <span>score = input("Enter standard level score: ")</span>
+                        </div>
+                        <div class="buggy-line py-2 px-3 border-b border-gray-900/40 flex items-center gap-3 text-gray-300" data-line-index="1" data-is-bug="true" data-feedback="Bug Found! Missing terminal colon declaration indicator ':' at the end of the conditional expression block statement.">
+                            <span class="text-gray-600 font-mono w-4 block text-right">2</span>
+                            <span>if score &gt;= 90</span>
+                        </div>
+                        <div class="buggy-line py-2 px-3 border-b border-gray-900/40 flex items-center gap-3 text-gray-400" data-line-index="2" data-is-bug="true" data-feedback="Bug Found! This code path block level violates critical compilation rules by completely missing the mandatory 4-space structural indentation layout.">
+                            <span class="text-gray-600 font-mono w-4 block text-right">3</span>
+                            <span>print("Passed with structural honors classification level status!")</span>
+                        </div>
+                        <div class="buggy-line py-2 px-3 border-b border-gray-900/40 flex items-center gap-3 text-gray-400" data-line-index="3" data-is-bug="false">
+                            <span class="text-gray-600 font-mono w-4 block text-right">4</span>
+                            <span>else:</span>
+                        </div>
+                        <div class="buggy-line py-2 px-3 flex items-center gap-3 text-gray-400" data-line-index="4" data-is-bug="false">
+                            <span class="text-gray-600 font-mono w-4 block text-right">5</span>
+                            <span>    print("Execution fallback path triggers routing update.")</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="bug-hunt-feedback-box" class="min-h-[3rem] text-xs p-3 bg-gray-950/60 rounded-xl border border-gray-800 text-gray-400 flex items-center justify-center text-center">
+                    Click the target codebase error lines above to initialize auditing analysis logs...
+                </div>
+            </div>
+
+            <div class="space-y-6 flex flex-col justify-between">
+                
+                <div class="bg-[#131A26] border border-gray-800 rounded-2xl p-5 space-y-3">
+                    <span class="text-[10px] bg-blue-950 text-blue-400 border border-blue-900 rounded font-mono px-1.5 py-0.5 font-bold uppercase tracking-wider">Concept Check 1</span>
+                    <h3 class="text-sm sm:text-base font-bold font-heading text-white">Which option reflects the evaluation profile output of: <code class="code-font text-amber-400 bg-gray-900 px-1 rounded">not (5 &gt; 3 and 2 == 2)</code>?</h3>
+                    
+                    <div class="grid grid-cols-1 gap-2 text-xs">
+                        <div class="mcq-option p-2.5 rounded-lg bg-[#0D1117] hover:bg-gray-800 border border-gray-800/80 flex items-center gap-2.5 text-gray-300" data-is-correct="false" data-feedback="Incorrect option selected. 5 > 3 is True and 2 == 2 is True. The compound statement matches True, which the 'not' operator flips to False.">
+                            <span class="w-5 h-5 rounded-full bg-gray-800 flex items-center justify-center font-bold text-[10px]">A</span>
+                            <span>True</span>
+                        </div>
+                        <div class="mcq-option p-2.5 rounded-lg bg-[#0D1117] hover:bg-gray-800 border border-gray-800/80 flex items-center gap-2.5 text-gray-300" data-is-correct="true" data-feedback="Correct! Inside the parentheses resolves to True. The outside 'not' operator flips it to False.">
+                            <span class="w-5 h-5 rounded-full bg-gray-800 flex items-center justify-center font-bold text-[10px]">B</span>
+                            <span>False</span>
+                        </div>
+                    </div>
+                    <div class="mcq-feedback text-[11px] hidden font-semibold text-gray-400 bg-gray-950 p-2 rounded border border-gray-900"></div>
+                </div>
+
+                <div class="bg-[#131A26] border border-gray-800 rounded-2xl p-5 space-y-3">
+                    <span class="text-[10px] bg-purple-950 text-purple-400 border border-purple-900 rounded font-mono px-1.5 py-0.5 font-bold uppercase tracking-wider">Concept Check 2</span>
+                    <h3 class="text-sm sm:text-base font-bold font-heading text-white">What structural compilation error occurs if you miss the 4-space indentation rule in a path block?</h3>
+                    
+                    <div class="grid grid-cols-1 gap-2 text-xs">
+                        <div class="mcq-option p-2.5 rounded-lg bg-[#0D1117] hover:bg-gray-800 border border-gray-800/80 flex items-center gap-2.5 text-gray-300" data-is-correct="false" data-feedback="Bypassed. The system halts immediately with an IndentationError before execution ever starts.">
+                            <span class="w-5 h-5 rounded-full bg-gray-800 flex items-center justify-center font-bold text-[10px]">A</span>
+                            <span>The execution route skips the code entirely without throwing an error message.</span>
+                        </div>
+                        <div class="mcq-option p-2.5 rounded-lg bg-[#0D1117] hover:bg-gray-800 border border-gray-800/80 flex items-center gap-2.5 text-gray-300" data-is-correct="true" data-feedback="Correct! The Python parser instantly halts execution, raising an IndentationError.">
+                            <span class="w-5 h-5 rounded-full bg-gray-800 flex items-center justify-center font-bold text-[10px]">B</span>
+                            <span>The program throws an immediate system-level IndentationError.</span>
+                        </div>
+                    </div>
+                    <div class="mcq-feedback text-[11px] hidden font-semibold text-gray-400 bg-gray-950 p-2 rounded border border-gray-900"></div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="slide flex-col justify-center w-full max-w-6xl mx-auto space-y-6">
+        <div class="border-l-4 border-purple-500 pl-4">
+            <h2 class="text-3xl font-bold text-white tracking-wide uppercase font-heading">06. Project Deliverables & Wrap-Up</h2>
+            <p class="text-gray-400">Mini-Project details, homework goals, and live interactive knowledge validation</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+            
+            <div class="lg:col-span-2 space-y-6 flex flex-col justify-between">
+                
+                <div class="bg-[#131A26] border border-gray-800 rounded-2xl p-5 space-y-4 flex-grow">
+                    <div class="flex items-center gap-2 text-xl font-bold font-heading text-white border-b border-gray-800 pb-2">
+                        <i class="fa-solid fa-trophy text-amber-400"></i> Mini-Project: Competition Eligibility Checker
+                    </div>
+                    
+                    <p class="text-sm text-gray-300 leading-relaxed">
+                        Construct a terminal system layout that asks for an applicant's age using <code class="code-font text-blue-400">input()</code> and routes them to one of three specific placement results:
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-2">
+                        <div class="p-2.5 bg-gray-900/60 rounded-xl border border-gray-800">
+                            <span class="text-red-400 font-bold block font-mono mb-1">Age &lt; 10</span>
+                            "Too young to participate."
+                        </div>
+                        <div class="p-2.5 bg-gray-900/60 rounded-xl border border-gray-800">
+                            <span class="text-amber-400 font-bold block font-mono mb-1">Age 10 to 18</span>
+                            "Eligible for the junior competition."
+                        </div>
+                        <div class="p-2.5 bg-gray-900/60 rounded-xl border border-gray-800">
+                            <span class="text-emerald-400 font-bold block font-mono mb-1">Age &gt; 18</span>
+                            "Eligible for the senior competition."
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-purple-950/30 to-indigo-950/30 border border-purple-900/40 rounded-2xl p-5">
+                    <h3 class="text-sm font-bold tracking-wider text-purple-400 uppercase font-heading mb-2"><i class="fa-solid fa-house-chimney text-xs mr-1"></i> Assignment Assignment Tasks</h3>
+                    <p class="text-xs text-gray-300 leading-relaxed">
+                        Write a driver's license qualification script tracking student inputs for age metrics. Integrate a custom condition parameter processing option for <strong>Learner's Permits</strong> if age equals exactly <code class="code-font text-amber-400 bg-gray-950 px-1 rounded">15</code>!
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-[#131A26] border border-gray-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                <div>
+                    <h3 class="text-base font-bold font-heading text-gray-200 border-b border-gray-800 pb-2 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-user-check text-blue-400"></i> Interactive Exit Ticket Check
+                    </h3>
+                    <p class="text-xs text-gray-400 mb-4 leading-relaxed">
+                        Fill in the missing logical keyword token parameter box below to create a comprehensive evaluation match block rule:
+                    </p>
+
+                    <div class="bg-[#0D1117] border border-gray-800 rounded-xl p-4 code-font text-xs sm:text-sm space-y-2 text-gray-300">
+                        <div>age = 17</div>
+                        <div>has_permit = True</div>
+                        <div class="mt-4 flex items-center gap-1.5 flex-wrap">
+                            <span class="text-pink-400 font-bold">if</span>
+                            <span>age &gt;= 16</span>
+                            <input type="text" id="assignment-fill-input" class="w-14 bg-[#090D14] text-center font-bold text-amber-400 border border-gray-700 rounded focus:outline-none focus:border-blue-500 py-0.5 text-xs font-mono" placeholder="..." autocomplete="off">
+                            <span>has_permit == True:</span>
+                        </div>
+                        <div class="pl-4 text-emerald-400">print("Licensing profile dispatch cleared.")</div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <button id="assignment-check-btn" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold font-heading transition shadow-md shadow-blue-900/20 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-square-check"></i> Validate Code Assignment Input
+                    </button>
+                    
+                    <div id="assignment-validation-feedback" class="min-h-[2.5rem] text-[11px] p-2.5 bg-gray-950/60 rounded-xl border border-gray-800 text-gray-400 flex items-center justify-center text-center">
+                        Awaiting validation compilation execution logs check request entries...
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+<div class="progress-bar" id="progress"></div>
+<div class="nav-hint">Use <span class="key-box">&larr;</span><span class="key-box">&rarr;</span> or <span class="key-box">Space</span> to navigate slides</div>
+
+<script>
+    // Presentation Navigation State Properties Engine
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('slide-counter');
+    const progress = document.getElementById('progress');
+    let currentSlideIndex = 0;
+
+    function updatePresentationLayoutView() {
+        slides.forEach((slide, idx) => {
+            if(idx === currentSlideIndex) {
+                slide.classList.add('active');
+            } else {
+                slide.classList.remove('active');
+            }
+        });
+        
+        // Counter tracking update configuration UI modifications
+        counter.innerText = `${currentSlideIndex + 1} / ${slides.length}`;
+        
+        // Linear Progress bar percentage tracking calculation updates
+        const progressPct = ((currentSlideIndex + 1) / slides.length) * 100;
+        progress.style.width = `${progressPct}%`;
+    }
+
+    function navigateNextSlide() {
+        if(currentSlideIndex < slides.length - 1) {
+            currentSlideIndex++;
+            updatePresentationLayoutView();
+        }
+    }
+
+    function navigatePrevSlide() {
+        if(currentSlideIndex > 0) {
+            currentSlideIndex--;
+            updatePresentationLayoutView();
+        }
+    }
+
+    // Connect standard keyboard macro configurations listeners
+    window.addEventListener('keydown', (e) => {
+        if(e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') {
+            return; // Halt presentation bypass tracking inside standard forms entry spaces
+        }
+        if(e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            navigateNextSlide();
+        } else if(e.key === 'ArrowLeft') {
+            e.preventDefault();
+            navigatePrevSlide();
+        }
+    });
+
+    // SLIDE 2: Interactive Hook Logic Slider Engine
+    const hookSlider = document.getElementById('hook-age-slider');
+    const hookValDisplay = document.getElementById('hook-age-val');
+    const hookBranchText = document.getElementById('hook-branch-active');
+
+    if(hookSlider) {
+        hookSlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            hookValDisplay.innerText = val;
+            
+            if(val >= 18) {
+                hookBranchText.innerText = 'print("Execution path matches target: Full Voting & Driving Clearance Authorized")';
+                hookBranchText.className = "pl-4 text-blue-400 font-bold";
+            } else if(val >= 16) {
+                hookBranchText.innerText = 'print("Execution path matches target: Learner Driving Permit Cleared")';
+                hookBranchText.className = "pl-4 text-purple-400 font-bold";
+            } else {
+                hookBranchText.innerText = 'print("Execution path matches target: Restrict Activity")';
+                hookBranchText.className = "pl-4 text-emerald-400";
+            }
+        });
+    }
+
+    // SLIDE 4: Live Sandbox Execution Parser Simulation Logic
+    const sandboxInput = document.getElementById('live-code-input');
+    const sandboxRunBtn = document.getElementById('run-sandbox-btn');
+    const sandboxOutputLog = document.getElementById('sandbox-output-log');
+
+    function parsePrintStatements(codeStr) {
+        try {
+            // Locate dynamic current assignment target updates for age inside string lines tracking
+            const ageMatch = codeStr.match(/age\s*=\s*(\d+)/);
+            if(!ageMatch) {
+                return "System execution failure error trace: Could not find initialized numerical variable 'age' structure inside code input script box.";
+            }
+            
+            const currentAgeValue = parseInt(ageMatch[1]);
+            let targetOutputBuffer = `>> Running script sequence with [age = ${currentAgeValue}] parameter data...\n`;
+            
+            // Replicate logical checking structures for the specific lesson plan variables syntax pattern profiles 
+            if(currentAgeValue >= 18) {
+                targetOutputBuffer += "You can vote.";
+            } else if(currentAgeValue >= 16) {
+                targetOutputBuffer += "You can drive but not vote.";
+            } else {
+                targetOutputBuffer += "You are too young to vote or drive.";
+            }
+            
+            return targetOutputBuffer;
+        } catch(err) {
+            return `General compilation tracking execution crash fault error message: ${err.message}`;
+        }
+    }
+
+    if(sandboxRunBtn && sandboxInput && sandboxOutputLog) {
+        sandboxRunBtn.addEventListener('click', () => {
+            sandboxOutputLog.innerText = "Initializing compiler sequence arrays...";
+            setTimeout(() => {
+                const simulatedResult = parsePrintStatements(sandboxInput.value);
+                sandboxOutputLog.innerText = simulatedResult;
+            }, 350);
+        });
+    }
+
+    // SLIDE 6: Bug Hunt Interactive System Verification Code Rules
+    const bugHuntLines = document.querySelectorAll('.buggy-line');
+    const bugCounterText = document.getElementById('bugs-remaining-counter');
+    const bugFeedbackBox = document.getElementById('bug-hunt-feedback-box');
+    let totalFoundBugs = 0;
+    const targetBugsTotal = 3;
+
+    bugHuntLines.forEach(line => {
+        line.addEventListener('click', () => {
+            const isBug = line.getAttribute('data-is-bug') === 'true';
+            const feedbackText = line.getAttribute('data-feedback');
+            
+            if(isBug) {
+                if(!line.classList.contains('correctly-flagged')) {
+                    line.classList.add('correctly-flagged');
+                    totalFoundBugs++;
+                    const remaining = Math.max(0, targetBugsTotal - totalFoundBugs);
+                    bugCounterText.innerText = remaining;
+                    bugFeedbackBox.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check"></i> ${feedbackText}</span>`;
+                    
+                    if(totalFoundBugs === targetBugsTotal) {
+                        bugCounterText.innerText = "0 - Audit Complete!";
+                        bugCounterText.className = "text-xs bg-emerald-950 text-emerald-400 border border-emerald-900 font-mono px-2 py-0.5 rounded-full font-bold";
+                    }
+                }
+            } else {
+                line.classList.add('flagged');
+                bugFeedbackBox.innerHTML = `<span class="text-red-400 font-bold"><i class="fa-solid fa-circle-xmark"></i> Safe Code Path Inspected: This line contains clean valid Python execution syntax structure boundaries. No bugs here!</span>`;
+                setTimeout(() => {
+                    line.classList.remove('flagged');
+                }, 1200);
+            }
+        });
+    });
+
+    // SLIDE 6: MCQ Selection Evaluation Interactivity Engine Updates
+    const mcqOptions = document.querySelectorAll('.mcq-option');
+    
+    mcqOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            const parentBlock = option.parentElement;
+            const feedbackContainer = parentBlock.nextElementSibling;
+            const isCorrect = option.getAttribute('data-is-correct') === 'true';
+            const optionFeedback = option.getAttribute('data-feedback');
+            
+            // Clear prior brother choices configurations states parameters checks inside block
+            parentBlock.querySelectorAll('.mcq-option').forEach(opt => {
+                opt.className = "mcq-option p-2.5 rounded-lg bg-[#0D1117] border border-gray-800/80 flex items-center gap-2.5 text-gray-400 pointer-events-none";
+            });
+            
+            if(isCorrect) {
+                option.className = "mcq-option p-2.5 rounded-lg bg-emerald-950/40 border-2 border-emerald-500 flex items-center gap-2.5 text-emerald-300 font-bold pointer-events-none";
+                feedbackContainer.className = "mcq-feedback text-[11px] font-semibold text-emerald-400 bg-emerald-950/20 p-2.5 rounded-xl border border-emerald-900/40 block mt-2 animate-fade-in";
+                feedbackContainer.innerHTML = `<i class="fa-solid fa-square-check mr-1"></i> ${optionFeedback}`;
+            } else {
+                option.className = "mcq-option p-2.5 rounded-lg bg-red-950/40 border-2 border-red-500 flex items-center gap-2.5 text-red-300 font-bold pointer-events-none";
+                feedbackContainer.className = "mcq-feedback text-[11px] font-semibold text-red-400 bg-red-950/20 p-2.5 rounded-xl border border-red-900/40 block mt-2 animate-fade-in";
+                feedbackContainer.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> ${optionFeedback}`;
+            }
+        });
+    });
+
+    // SLIDE 7: Final Exit Ticket Assignment Match Validation Block Engine 
+    const assignmentCheckBtn = document.getElementById('assignment-check-btn');
+    const assignmentInput = document.getElementById('assignment-fill-input');
+    const assignmentFeedback = document.getElementById('assignment-validation-feedback');
+
+    if(assignmentCheckBtn && assignmentInput && assignmentFeedback) {
+        assignmentCheckBtn.addEventListener('click', () => {
+            const userStringVal = assignmentInput.value.trim().toLowerCase();
+            
+            if(userStringVal === "") {
+                assignmentFeedback.className = "min-h-[2.5rem] text-[11px] p-2.5 bg-yellow-950/20 border border-yellow-900/40 rounded-xl text-yellow-400 flex items-center justify-center text-center";
+                assignmentFeedback.innerHTML = `<i class="fa-solid fa-keyboard mr-1.5 animate-pulse"></i> Blank assignment target captured. Please specify an operator string inside the box workspace text entry box area.`;
+                return;
+            }
+            
+            if(userStringVal === 'and') {
+                assignmentFeedback.className = "min-h-[2.5rem] text-[11px] p-2.5 bg-emerald-950/40 border border-emerald-500 rounded-xl text-emerald-400 flex items-center justify-center text-center font-bold";
+                assignmentFeedback.innerHTML = `<i class="fa-solid fa-circle-check text-base mr-1.5"></i> Mission Validation Success! The 'and' operator correctly binds both conditional statements together to ensure both resolve true concurrently.`;
+                assignmentInput.className = "w-14 bg-emerald-950 text-center font-bold text-emerald-400 border-2 border-emerald-500 rounded py-0.5 text-xs font-mono pointer-events-none";
+                assignmentCheckBtn.disabled = true;
+                assignmentCheckBtn.className = "w-full py-2 bg-emerald-800 text-gray-400 rounded-xl text-xs font-bold font-heading transition cursor-not-allowed opacity-50 flex items-center justify-center gap-2";
+            } else {
+                assignmentFeedback.className = "min-h-[2.5rem] text-[11px] p-2.5 bg-red-950/40 border border-red-500 rounded-xl text-red-400 flex items-center justify-center text-center";
+                assignmentFeedback.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1.5"></i> Output mismatch compilation validation error: '${userStringVal}' is incorrect. Re-evaluate strict double match parameters requirements.`;
+                
+                // Pulsate structural failure shake wrapper entry visualization feedback 
+                assignmentInput.classList.add('border-red-500', 'bg-red-950/20');
+                setTimeout(() => {
+                    assignmentInput.classList.remove('border-red-500', 'bg-red-950/20');
+                }, 800);
+            }
+        });
+    }
+
+    // Initialize layout setup configuration triggers on initial window boot step operations parameters 
+    updatePresentationLayoutView();
+</script>
+
+</body>
+</html>

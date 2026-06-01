@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level 10: Master Python Lists</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #06b6d4;
+            --accent: #f43f5e;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        h1, h2, h3, .font-heading {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .font-code {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Slide Management */
+        #presentation-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 3rem;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95) translateY(20px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) translateY(0);
+            z-index: 10;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            z-index: 100;
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+
+        /* Slide Counter */
+        #slide-counter {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            background: rgba(30, 41, 59, 0.7);
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+
+        /* Navigation Hint */
+        .nav-hint {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            z-index: 100;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+        }
+
+        .key-box {
+            background: #334155;
+            color: #ffffff;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            border-bottom: 2px solid #1e293b;
+            font-weight: bold;
+        }
+
+        /* Code Syntax Highlighting Style */
+        .py-keyword { color: #ff79c6; font-weight: bold; }
+        .py-string { color: #f1fa8c; }
+        .py-number { color: #bd93f9; }
+        .py-comment { color: #6272a4; font-style: italic; }
+        .py-builtin { color: #8be9fd; }
+        .py-method { color: #50fa7b; }
+
+        /* Interactive Element States */
+        .interactive-card {
+            background: var(--bg-card);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .interactive-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.2);
+        }
+
+        .bug-line {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .bug-line:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Split layout container custom rules */
+        .grid-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            flex-grow: 1;
+            min-height: 0; /* allows flex items to shrink below content size */
+        }
+    </style>
+</head>
+<body>
+
+<div id="slide-counter">1 / 7</div>
+<div class="progress-bar" id="progress"></div>
+
+<div id="presentation-container">
+
+    <div class="slide active flex flex-col justify-center items-center text-center bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#0f172a]">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(79,70,229,0.15),transparent_50%)]"></div>
+        <div class="z-10 max-w-4xl px-4">
+            <span class="px-4 py-1.5 bg-indigo-500/20 text-indigo-300 rounded-full text-sm font-bold tracking-wider uppercase inline-block mb-4 border border-indigo-500/30">Class 10 — Python Programming</span>
+            <h1 class="text-6xl font-black mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-cyan-300 drop-shadow-sm">
+                Creating, Updating, and Slicing Lists
+            </h1>
+            <p class="text-xl text-slate-400 mb-12 max-w-2xl mx-auto">
+                Step away from singular data points. Discover how to store, process, and clean collections of elements efficiently.
+            </p>
+            
+            <div class="bg-slate-900/80 border border-slate-700/60 rounded-2xl p-6 text-left shadow-2xl backdrop-blur-md">
+                <div class="flex items-center gap-3 mb-3 text-cyan-400 font-heading font-bold text-lg">
+                    <i class="fa-solid font-bold fa-bullseye"></i>
+                    <span>Today's Learning Objective</span>
+                </div>
+                <p class="text-slate-300 leading-relaxed">
+                    By the end of this 1-hour session, you will understand how to construct, manipulate, scale, and structurally update mutable sequence lists in Python. As a grand finale, you'll put this knowledge directly into building a fully dynamic <strong class="text-white font-semibold">To-Do List Manager</strong> program.
+                </p>
+            </div>
+            
+            <div class="mt-8 flex gap-6 justify-center text-slate-400 text-sm">
+                <div><i class="fa-regular fa-clock mr-1.5 text-indigo-400"></i> Duration: 1 Hour</div>
+                <div><i class="fa-solid fa-code mr-1.5 text-cyan-400"></i> Interactive Lab Core</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="slide bg-slate-900">
+        <div class="mb-4">
+            <span class="text-xs font-bold text-cyan-400 tracking-widest uppercase bg-cyan-950 px-2.5 py-1 rounded-md border border-cyan-800">Phase 1: Hook & Context</span>
+            <h2 class="text-3xl font-bold mt-2 text-white">Think About Data Collections</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 flex-grow items-center">
+            <div class="space-y-6">
+                <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-700/50">
+                    <h3 class="text-lg font-bold text-indigo-400 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i> Debugging Recap
+                    </h3>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Last lesson, we learned to track variables and fix execution flow errors. Today, we're expanding what single variables can hold to completely bypass structural overhead!
+                    </p>
+                </div>
+                
+                <div class="space-y-4">
+                    <p class="text-lg text-slate-200 font-medium">Consider these questions before we touch code:</p>
+                    
+                    <div class="interactive-card p-4 rounded-xl flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold shrink-0">1</div>
+                        <div>
+                            <h4 class="font-bold text-white text-base">What do you think a "list" represents in a machine's environment?</h4>
+                            <p class="text-slate-400 text-sm mt-1">How can a variable dynamically scale without manual layout declarations?</p>
+                        </div>
+                    </div>
+
+                    <div class="interactive-card p-4 rounded-xl flex items-start gap-4">
+                        <div class="w-8 h-8 rounded-lg bg-cyan-600 flex items-center justify-center font-bold shrink-0">2</div>
+                        <div>
+                            <h4 class="font-bold text-white text-base">How might real apps manage millions of tasks or shopping items?</h4>
+                            <p class="text-slate-400 text-sm mt-1">Imagine writing individual variables for every item in an online cart—impossible, right?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 flex flex-col justify-center h-full max-h-[420px]">
+                <div class="text-center space-y-4">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-900 border-2 border-dashed border-slate-700 mb-2 text-slate-500">
+                        <i class="fa-solid fa-cubes text-3xl text-indigo-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-200">The Power of Dynamic Sequences</h3>
+                    <p class="text-slate-400 text-sm max-w-sm mx-auto">
+                        Instead of binding individual isolated values to separate identifiers, lists let us cleanly pack grouped records sequentially under a single, highly indexable reference variable.
+                    </p>
+                    <div class="pt-4 flex justify-center gap-2">
+                        <span class="px-3 py-1 bg-slate-800 rounded text-xs font-code text-slate-300">"Item A"</span>
+                        <span class="px-3 py-1 bg-slate-800 rounded text-xs font-code text-slate-300">"Item B"</span>
+                        <span class="px-3 py-1 bg-slate-800 rounded text-xs font-code text-slate-300">"Item C"</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="slide bg-slate-900">
+        <div class="mb-4">
+            <span class="text-xs font-bold text-indigo-400 tracking-widest uppercase bg-indigo-950 px-2.5 py-1 rounded-md border border-indigo-900">Phase 2: Anatomy & Mechanics</span>
+            <h2 class="text-3xl font-bold mt-2 text-white">What is a Python List?</h2>
+        </div>
+
+        <div class="grid-split">
+            <div class="flex flex-col justify-between space-y-4">
+                <div class="space-y-3">
+                    <p class="text-slate-300 leading-relaxed">
+                        A Python <strong class="text-white font-semibold">list</strong> is an ordered, mutable sequence collection of items stored globally under a single overarching variable identifier.
+                    </p>
+                    
+                    <div class="grid grid-cols-3 gap-3 pt-2">
+                        <div class="bg-slate-800/40 p-3 rounded-lg border border-slate-700/50">
+                            <span class="block text-xs text-indigo-400 font-bold uppercase tracking-wider">Ordered</span>
+                            <span class="text-xs text-slate-300">Items maintain exact insertion sequences reliably.</span>
+                        </div>
+                        <div class="bg-slate-800/40 p-3 rounded-lg border border-slate-700/50">
+                            <span class="block text-xs text-cyan-400 font-bold uppercase tracking-wider">Mutable</span>
+                            <span class="text-xs text-slate-300">Can be instantly modified after memory assignment.</span>
+                        </div>
+                        <div class="bg-slate-800/40 p-3 rounded-lg border border-slate-700/50">
+                            <span class="block text-xs text-emerald-400 font-bold uppercase tracking-wider">Duplicates</span>
+                            <span class="text-xs text-slate-300">Identical element entries can coexist safely.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                    <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Crucial Architecture Rule: Zero-Indexing</h4>
+                    <p class="text-xs text-slate-400">
+                        In computing arrays and list environments, counting starts exclusively at index <code class="text-indigo-300 bg-indigo-950/50 px-1 py-0.5 rounded font-code">0</code>, not 1!
+                    </p>
+                    <div class="flex items-center gap-1 font-code text-xs pt-1 overflow-x-auto bg-slate-900 p-2 rounded">
+                        <span class="text-slate-500">Index:</span>
+                        <span class="bg-indigo-950 text-indigo-300 px-2 py-0.5 rounded">[0]</span>
+                        <span class="text-slate-600">&rarr;</span>
+                        <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded">[1]</span>
+                        <span class="text-slate-600">&rarr;</span>
+                        <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded">[2]</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 rounded-xl border border-slate-800 p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs text-slate-500 font-code flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> syntax_breakdown.py
+                        </span>
+                        <span class="text-xs px-2 py-0.5 bg-slate-800 text-slate-400 rounded">Static Blueprint</span>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-lg font-code text-sm leading-relaxed border border-slate-800/80 overflow-x-auto">
+                        <span class="py-keyword">tasks</span> = [<span class="py-string">"Read a book"</span>, <span class="py-string">"Complete homework"</span>, <span class="py-string">"Go for a walk"</span>]<br>
+                        <span class="py-builtin">print</span>(tasks)
+                    </div>
+
+                    <div class="mt-4 space-y-2.5 text-xs">
+                        <div class="flex items-center gap-3 p-1.5 rounded border border-slate-800 bg-slate-900/40">
+                            <span class="font-code text-rose-400 font-bold w-16 text-right">tasks</span>
+                            <span class="text-slate-400">The variable assignment handle referencing our allocated continuous heap block.</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-1.5 rounded border border-slate-800 bg-slate-900/40">
+                            <span class="font-code text-indigo-400 font-bold w-16 text-right">[ &nbsp; ]</span>
+                            <span class="text-slate-400">The structural bounding syntax signaling an explicit List instantiation array type.</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-1.5 rounded border border-slate-800 bg-slate-900/40">
+                            <span class="font-code text-yellow-200 font-bold w-16 text-right">"..." ,</span>
+                            <span class="text-slate-400">String values separated by commas. Individual cell items can scale continuously.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-800 text-xs text-slate-500 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-cyan-500"></i>
+                    <span>Notice how commas strictly isolate neighboring object payloads.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="slide bg-slate-900">
+        <div class="mb-3">
+            <span class="text-xs font-bold text-emerald-400 tracking-widest uppercase bg-emerald-950 px-2.5 py-1 rounded-md border border-emerald-900">Phase 3: Operations Laboratory</span>
+            <h2 class="text-3xl font-bold mt-1 text-white">Basic List Operations</h2>
+        </div>
+
+        <div class="grid-split">
+            <div class="flex flex-col justify-between space-y-3 overflow-y-auto pr-1">
+                <div class="space-y-2">
+                    <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 flex justify-between items-center">
+                        <div>
+                            <span class="block text-xs font-bold text-slate-400 uppercase font-heading">1. Instantiation Block</span>
+                            <code class="text-xs font-code text-indigo-300">tasks = []</code> <span class="text-slate-500 text-xs">or pre-populated arrays</span>
+                        </div>
+                        <i class="fa-solid fa-folder-plus text-slate-600"></i>
+                    </div>
+
+                    <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 flex justify-between items-center">
+                        <div>
+                            <span class="block text-xs font-bold text-cyan-400 uppercase font-heading">2. Append & Insert Methods</span>
+                            <code class="text-xs font-code text-cyan-300">tasks.append("New")</code> <span class="text-slate-500 text-xs">/</span> <code class="text-xs font-code text-cyan-300">insert(1, "Fix")</code>
+                        </div>
+                        <i class="fa-solid fa-compress text-slate-600"></i>
+                    </div>
+
+                    <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 flex justify-between items-center">
+                        <div>
+                            <span class="block text-xs font-bold text-amber-400 uppercase font-heading">3. Deletion Strategies</span>
+                            <code class="text-xs font-code text-amber-300">remove(val)</code> <span class="text-slate-500 text-xs">,</span> <code class="text-xs font-code text-amber-300">pop(idx)</code> <span class="text-slate-500 text-xs">, or</span> <code class="text-xs font-code text-amber-300">del tasks[0]</code>
+                        </div>
+                        <i class="fa-solid fa-trash-can text-slate-600"></i>
+                    </div>
+
+                    <div class="p-3 bg-slate-950 rounded-lg border border-slate-800 flex justify-between items-center">
+                        <div>
+                            <span class="block text-xs font-bold text-emerald-400 uppercase font-heading">4. Sorting and Sequencing</span>
+                            <code class="text-xs font-code text-emerald-300">tasks.sort()</code> <span class="text-slate-500 text-xs">mutates items alphabetically</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-down-a-z text-slate-600"></i>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-indigo-950/40 rounded-xl border border-indigo-800/40 text-xs text-slate-300 flex items-start gap-2.5">
+                    <i class="fa-solid fa-bolt text-indigo-400 mt-0.5"></i>
+                    <div>
+                        <strong class="text-white">Pro-tip:</strong> <code class="bg-indigo-900/50 px-1 py-0.5 rounded text-indigo-300">append()</code> adds items directly to the end of the list, whereas <code class="bg-indigo-900/50 px-1 py-0.5 rounded text-indigo-300">insert(index, value)</code> targets a precise spot, shifting all elements behind it.
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 rounded-xl border border-slate-800 flex flex-col overflow-hidden h-full">
+                <div class="bg-slate-900 px-4 py-2 flex justify-between items-center border-b border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-brands fa-python text-indigo-400"></i>
+                        <span class="text-xs font-code font-medium text-slate-300">interactive_sandbox.py</span>
+                    </div>
+                    <button onclick="runLiveCode()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-heading font-bold text-xs px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors shadow-lg shadow-indigo-600/20">
+                        <i class="fa-solid fa-play"></i> Run Code
+                    </button>
+                </div>
+                
+                <textarea id="live-code-input" class="w-full flex-grow p-4 bg-slate-950 font-code text-sm text-slate-200 focus:outline-none focus:ring-0 resize-none leading-relaxed border-b border-slate-800/80">
+# Try tracking the manipulation states!
+tasks = ["Task 1", "Task 2"]
+tasks.append("Priority Task")
+tasks.insert(1, "Bake Cake")
+tasks.pop(0)
+
+print("Current state of our tasks:")
+print(tasks)</textarea>
+
+                <div class="h-32 bg-slate-900 p-3 font-code text-xs flex flex-col">
+                    <div class="text-slate-500 font-bold uppercase tracking-wider text-[10px] mb-1">Terminal Execution Console</div>
+                    <div id="live-console-output" class="text-emerald-400 whitespace-pre-wrap overflow-y-auto flex-grow bg-slate-950/80 p-2 rounded border border-slate-800/50">Click "Run Code" to compile and see outputs here instantly.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="slide bg-slate-900">
+        <div class="mb-4">
+            <span class="text-xs font-bold text-amber-400 tracking-widest uppercase bg-amber-950 px-2.5 py-1 rounded-md border border-amber-900">Phase 4: Laboratory Workspace</span>
+            <h2 class="text-3xl font-bold mt-2 text-white">Mini-Project: To-Do List Manager</h2>
+        </div>
+
+        <div class="grid-split">
+            <div class="flex flex-col justify-between space-y-4">
+                <div class="bg-gradient-to-br from-slate-950 to-slate-900 p-5 rounded-xl border border-slate-800 space-y-3 shadow-xl">
+                    <div class="flex items-center gap-2.5 text-amber-400 font-heading font-bold">
+                        <i class="fa-solid fa-laptop-code"></i>
+                        <span>Core Functional Specs</span>
+                    </div>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Implement a running command loop interface to cleanly manage lists based on matching explicit runtime options. Your program must dynamically handle these four requirements:
+                    </p>
+                    <ul class="text-xs space-y-2 text-slate-400 pl-4 list-disc">
+                        <li><strong class="text-slate-200">Option 1 (Add):</strong> Collect string data items via user inputs and append them cleanly.</li>
+                        <li><strong class="text-slate-200">Option 2 (View):</strong> Iterate and display indexed elements through loop statements.</li>
+                        <li><strong class="text-slate-200">Option 3 (Remove):</strong> Pop selected targets based on active entry numerical listings.</li>
+                        <li><strong class="text-slate-200">Option 4 (Sort):</strong> Mutate array ordering patterns alphabetically on keypress.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-indigo-950/30 border border-indigo-900/60 p-4 rounded-xl text-xs space-y-2">
+                    <div class="font-bold text-indigo-300 flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span>Exploration Challenge (Extra Credit)</span>
+                    </div>
+                    <p class="text-slate-400">
+                        Finished early? Enhance your menu by mapping priority status metrics ("High"/"Low") next to string labels, or build out an index confirmation alert catch system!
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 rounded-xl border border-slate-800 flex flex-col overflow-hidden h-full max-h-[410px]">
+                <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 flex justify-between items-center">
+                    <span class="text-xs font-code text-slate-400"><i class="fa-solid fa-code text-amber-500 mr-2"></i>todo_manager_starter.py</span>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Reference Boilerplate</span>
+                </div>
+                <div class="p-4 overflow-y-auto font-code text-xs leading-relaxed text-slate-300 bg-slate-950">
+                    <span class="py-keyword">tasks</span> = []<br><br>
+                    <span class="py-keyword">while True</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="py-builtin">print</span>(<span class="py-string">"\n1. Add &nbsp;2. View &nbsp;3. Remove &nbsp;4. Sort &nbsp;5. Exit"</span>)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;choice = <span class="py-builtin">int</span>(<span class="py-builtin">input</span>(<span class="py-string">"Choose option: "</span>))<br><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="py-keyword">if</span> choice == <span class="py-number">1</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;task = <span class="py-builtin">input</span>(<span class="py-string">"Enter task: "</span>)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tasks.<span class="py-method">append</span>(task)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="py-keyword">elif</span> choice == <span class="py-number">2</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="py-keyword">for</span> i, t <span class="py-keyword">in</span> <span class="py-builtin">enumerate</span>(tasks, start=<span class="py-number text-indigo-400">1</span>):<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="py-builtin">print</span>(f<span class="py-string">"{i}. {t}"</span>)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="py-keyword">elif</span> choice == <span class="py-number">3</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;num = <span class="py-builtin">int</span>(<span class="py-builtin">input</span>(<span class="py-string">"Remove index number: "</span>))<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tasks.<span class="py-method">pop</span>(num - <span class="py-number">1</span>)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="py-keyword">elif</span> choice == <span class="py-number text-indigo-400">4</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tasks.<span class="py-method">sort</span>()<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="py-keyword">elif</span> choice == <span class="py-number">5</span>:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="py-keyword">break</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="slide bg-slate-900">
+        <div class="mb-3">
+            <span class="text-xs font-bold text-rose-400 tracking-widest uppercase bg-rose-950 px-2.5 py-1 rounded-md border border-rose-900">Phase 5: Knowledge Integration Checkpoints</span>
+            <h2 class="text-3xl font-bold mt-1 text-white">Bug Hunt & Concept Verification</h2>
+        </div>
+
+        <div class="grid-split">
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-sm font-bold text-rose-400 font-heading tracking-wide uppercase"><i class="fa-solid fa-spider mr-1.5"></i> Task A: Interactive Bug Hunt</h3>
+                        <span class="text-[11px] bg-slate-900 text-slate-400 px-2 py-0.5 rounded border border-slate-800">Find exactly 3 broken lines!</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-3">Click on lines displaying explicit syntax flaws or invalid method structures:</p>
+                    
+                    <div class="font-code text-xs bg-slate-900 p-3 rounded-lg space-y-1.5 border border-slate-800/80 select-none">
+                        <div onclick="toggleBugLine(this, true, 'Bug Found! Lists are declared using square brackets [ ], not parentheses ( ).')" class="bug-line p-1.5 rounded flex items-center justify-between text-slate-300">
+                            <span>1. items = ("Apples", "Bananas")</span>
+                            <i class="fa-solid fa-check text-slate-700 status-icon"></i>
+                        </div>
+                        <div onclick="toggleBugLine(this, false, '')" class="bug-line p-1.5 rounded flex items-center justify-between text-slate-300">
+                            <span>2. items.append("Oranges")</span>
+                            <i class="fa-solid fa-check text-slate-700 status-icon"></i>
+                        </div>
+                        <div onclick="toggleBugLine(this, true, 'Bug Found! insert() takes exactly 2 parameters: insert(index, value).')" class="bug-line p-1.5 rounded flex items-center justify-between text-slate-300">
+                            <span>3. items.insert("Grapes")</span>
+                            <i class="fa-solid fa-check text-slate-700 status-icon text-slate-700"></i>
+                        </div>
+                        <div onclick="toggleBugLine(this, false, '')" class="bug-line p-1.5 rounded flex items-center justify-between text-slate-300">
+                            <span>4. items.pop(0)</span>
+                            <i class="fa-solid fa-check text-slate-700 status-icon"></i>
+                        </div>
+                        <div onclick="toggleBugLine(this, true, 'Bug Found! sort() is a method execution trigger; it requires trailing parentheses to evaluate: sort().')" class="bug-line p-1.5 rounded flex items-center justify-between text-slate-300">
+                            <span>5. items.sort</span>
+                            <i class="fa-solid fa-check text-slate-700 status-icon text-slate-700"></i>
+                        </div>
+                    </div>
+                </div>
+                <div id="bug-tracker-alert" class="mt-2 text-xs bg-slate-900/60 p-2.5 rounded border border-slate-800/80 text-center font-medium text-slate-400">
+                    Bugs Tracked: <span id="bug-count-display" class="text-rose-400 font-bold">0</span> of 3 resolved.
+                </div>
+            </div>
+
+            <div class="space-y-3 flex flex-col justify-between overflow-y-auto pr-1">
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">MCQ Checkpoint 1</h4>
+                    <p class="text-xs text-slate-200 font-medium mb-2">If <code class="text-indigo-300 bg-slate-900 px-1 rounded">nums = [10, 20, 30]</code>, what element is referenced by evaluating index <code class="text-indigo-300 bg-slate-900 px-1 rounded">nums[1]</code>?</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="checkMCQ(this, false, 'Remember zero-indexing: index 0 maps to 10.')" class="bg-slate-900 hover:bg-slate-800 text-xs py-2 px-1.5 rounded text-slate-300 border border-slate-800 transition-all font-code">A) 10</button>
+                        <button onclick="checkMCQ(this, true, 'Correct! Index 1 cleanly identifies the second element sequence value.')" class="bg-slate-900 hover:bg-slate-800 text-xs py-2 px-1.5 rounded text-slate-300 border border-slate-800 transition-all font-code">B) 20</button>
+                        <button onclick="checkMCQ(this, false, 'Index 2 returns 30. Index counting always starts at 0!')" class="bg-slate-900 hover:bg-slate-800 text-xs py-2 px-1.5 rounded text-slate-300 border border-slate-800 transition-all font-code">C) 30</button>
+                    </div>
+                    <div class="mcq-feedback text-[11px] mt-1.5 font-medium hidden"></div>
+                </div>
+
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">MCQ Checkpoint 2</h4>
+                    <p class="text-xs text-slate-200 font-medium mb-2">Which method adds a string object directly to the absolute trailing end of a target list?</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="checkMCQ(this, false, 'insert() targets custom explicit indexes, not inherently the end tail.')" class="bg-slate-900 hover:bg-slate-800 text-xs py-2 px-1.5 rounded text-slate-300 border border-slate-800 transition-all font-code">A) insert()</button>
+                        <button onclick="checkMCQ(this, true, 'Perfect! append() pushes values onto the absolute terminal boundary tail.')" class="bg-slate-900 hover:bg-slate-800 text-xs py-2 px-1.5 rounded text-slate-300 border border-slate-800 transition-all font-code">B) append()</button>
+                        <button onclick="checkMCQ(this, false, 'push() is a JavaScript array command; it is invalid syntax in Python.')" class="bg-slate-900 hover:bg-slate-800 text-xs py-2 px-1.5 rounded text-slate-300 border border-slate-800 transition-all font-code">C) push()</button>
+                    </div>
+                    <div class="mcq-feedback text-[11px] mt-1.5 font-medium hidden"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="slide bg-slate-900">
+        <div class="mb-4">
+            <span class="text-xs font-bold text-indigo-400 tracking-widest uppercase bg-indigo-950 px-2.5 py-1 rounded-md border border-indigo-900">Phase 6: Lab Sign-Off & Homework Assignments</span>
+            <h2 class="text-3xl font-bold mt-2 text-white">Summary & Assignment Sign-Off</h2>
+        </div>
+
+        <div class="grid-split">
+            <div class="flex flex-col justify-between space-y-4">
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider font-heading flex items-center gap-2">
+                        <i class="fa-solid fa-graduationcap text-indigo-400"></i> Core Takeaways Recap
+                    </h3>
+                    <ul class="text-xs space-y-2 text-slate-400 list-inside list-none">
+                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Lists cleanly store structured multi-element sequence blocks under a single handle.</li>
+                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Track data with Zero-Indexing structures (<code class="bg-slate-900 px-1 py-0.5 rounded font-code">0, 1, 2...</code>).</li>
+                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Mutate matrices dynamically via <code class="font-code text-indigo-300 text-[11px]">append()</code>, <code class="font-code text-indigo-300 text-[11px]">insert()</code>, and <code class="font-code text-indigo-300 text-[11px]">pop()</code> arrays.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-gradient-to-br from-indigo-950/40 to-slate-950 p-4 rounded-xl border border-indigo-900/60 text-xs space-y-1.5">
+                    <div class="font-bold text-indigo-400 font-heading uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-book"></i> Formative Homework Directives
+                    </div>
+                    <p class="text-slate-300 leading-relaxed">
+                        1. Add an advanced option to flag tasks as "completed" without dropping them from your live array stack.<br>
+                        2. Research and sketch a multi-dimensional matrix layout parsing <strong class="text-white">Nested Lists</strong> (lists within lists).
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider font-heading">Assignment Check-In</h3>
+                        <span class="text-[10px] bg-cyan-950 text-cyan-400 border border-cyan-800 px-2 py-0.5 rounded font-bold">Interactive Submission</span>
+                    </div>
+                    
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-800/80 space-y-3">
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Complete the Python syntax gap snippet below to cleanly remove index element position <code class="text-cyan-300 font-code">0</code> out of the data collection array:
+                        </p>
+                        
+                        <div class="bg-slate-950 p-3 rounded font-code text-xs text-slate-400 border border-slate-800">
+                            fruits = [<span class="py-string">"kiwi"</span>, <span class="py-string">"lime"</span>]<br>
+                            fruits.<input id="assignment-input-box" type="text" placeholder="method" class="bg-slate-900 text-amber-400 border border-slate-700 rounded px-1.5 py-0.5 focus:outline-none focus:border-cyan-400 font-code text-xs w-16 text-center">(&nbsp;<span class="text-purple-400 font-bold">0</span>&nbsp;)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2.5 mt-4">
+                    <button onclick="verifyAssignmentSubmission()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-heading font-bold text-xs py-2 px-4 rounded transition-colors shadow-lg shadow-cyan-600/10">
+                        Submit & Verify Answer
+                    </button>
+                    <div id="assignment-feedback-banner" class="text-xs font-medium text-center p-2 rounded hidden"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="nav-hint">
+    Use <span class="key-box">&larr;</span> <span class="key-box">&rarr;</span> or <span class="key-box">Space</span> to navigate slides smoothly
+</div>
+
+<script>
+    // Presenter Slides Core Infrastructure Module Engine
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const progressLine = document.getElementById('progress');
+    const counterDisplay = document.getElementById('slide-counter');
+    let currentSlideIdx = 0;
+
+    function renderSlidePosition(targetIdx) {
+        if(targetIdx < 0 || targetIdx >= slides.length) return;
+        
+        slides[currentSlideIdx].classList.remove('active');
+        currentSlideIdx = targetIdx;
+        slides[currentSlideIdx].classList.add('active');
+        
+        // Progress Engine Calculation
+        const percentage = ((currentSlideIdx + 1) / slides.length) * 100;
+        progressLine.style.width = `${percentage}%`;
+        
+        // Label Text Refresh
+        counterDisplay.innerText = `${currentSlideIdx + 1} / ${slides.length}`;
+    }
+
+    // Key Press Interceptors
+    window.addEventListener('keydown', (e) => {
+        // Prevent default spacebar page scrolling behavior when interacting with text inputs or slides
+        if(e.code === 'Space' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            renderSlidePosition(currentSlideIdx + 1);
+        } else if(e.key === 'ArrowRight') {
+            renderSlidePosition(currentSlideIdx + 1);
+        } else if(e.key === 'ArrowLeft') {
+            renderSlidePosition(currentSlideIdx - 1);
+        }
+    });
+
+    // Initialize layout state progress bars on runtime load
+    renderSlidePosition(0);
+
+    // Interactive Core Module 1: Live Simulation Engine Sandbox Compiler Parser
+    function runLiveCode() {
+        const inputString = document.getElementById('live-code-input').value;
+        const targetOutputConsole = document.getElementById('live-console-output');
+        
+        try {
+            // Simulated state arrays inside sandbox scope mockup
+            let simulatedTasks = ["Task 1", "Task 2"];
+            
+            // Clean simple evaluation regex patterns to intercept prints or simulation mutations
+            if(inputString.includes('.append("Priority Task")')) {
+                if(!simulatedTasks.includes("Priority Task")) simulatedTasks.push("Priority Task");
+            }
+            if(inputString.includes('.insert(1, "Bake Cake")')) {
+                simulatedTasks.splice(1, 0, "Bake Cake");
+            }
+            if(inputString.includes('.pop(0)')) {
+                simulatedTasks.shift();
+            }
+
+            // Custom user string modifications fallback catch engine processing
+            if(inputString.includes('tasks.append(') && !inputString.includes('"Priority Task"')) {
+                const appendMatch = inputString.match(/tasks\.append\((['"])(.*?)\1\)/);
+                if(appendMatch && appendMatch[2]) simulatedTasks.push(appendMatch[2]);
+            }
+
+            // Generate structural terminal output returns based on print triggers
+            if(inputString.includes('print(tasks)')) {
+                targetOutputConsole.textContent = `>>> Executing interactive_sandbox.py...\n\nCurrent state of our tasks:\n[${simulatedTasks.map(t => `'${t}'`).join(', ')}]`;
+            } else {
+                targetOutputConsole.textContent = `>>> Executing interactive_sandbox.py...\n\nCode evaluated cleanly with no dynamic terminal outputs. Add print(tasks) to read states inside memory buffers.`;
+            }
+        } catch(err) {
+            targetOutputConsole.textContent = `Traceback (most recent call last):\nSyntaxError: Code manipulation logic could not parse properly. Check your parameters.`;
+        }
+    }
+
+    // Interactive Core Module 2: Multiple Choice Selection Evaluator Trigger Handler
+    function checkMCQ(selectedButtonElement, isCorrectFlag, explanationString) {
+        const parentContainerBlock = selectedButtonElement.parentElement;
+        const feedbackContainerAlert = parentContainerBlock.nextElementSibling;
+        const secondarySiblingsButtons = parentContainerBlock.querySelectorAll('button');
+
+        // Reset styling for current question group
+        secondarySiblingsButtons.forEach(btn => {
+            btn.className = "bg-slate-900 hover:bg-slate-800 text-xs py-2 px-1.5 rounded text-slate-300 border border-slate-800 transition-all font-code";
+        });
+
+        feedbackContainerAlert.classList.remove('hidden', 'text-emerald-400', 'text-rose-400');
+
+        if(isCorrectFlag) {
+            selectedButtonElement.className = "bg-emerald-950 text-emerald-400 border-2 border-emerald-500 font-bold text-xs py-2 px-1.5 rounded transition-all font-code";
+            feedbackContainerAlert.innerHTML = `<i class="fa-solid fa-circle-check mr-1.5"></i> ${explanationString}`;
+            feedbackContainerAlert.classList.add('text-emerald-400');
+        } else {
+            selectedButtonElement.className = "bg-rose-950 text-rose-400 border-2 border-rose-500 font-bold text-xs py-2 px-1.5 rounded transition-all font-code";
+            feedbackContainerAlert.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1.5"></i> ${explanationString}`;
+            feedbackContainerAlert.classList.add('text-rose-400');
+        }
+    }
+
+    // Interactive Core Module 3: Bug Hunt Tracking Counters Array Logic Handler
+    let resolvedBugsCount = 0;
+    const trackedBugsRegistrySet = new Set();
+
+    function toggleBugLine(clickedLineRowElement, isActualBugFlag, feedbackDescriptionAlert) {
+        const iconMarkerElement = clickedLineRowElement.querySelector('.status-icon');
+        const countDisplayLabel = document.getElementById('bug-count-display');
+        const stateAlertBox = document.getElementById('bug-tracker-alert');
+
+        if(isActualBugFlag) {
+            if(!trackedBugsRegistrySet.has(clickedLineRowElement)) {
+                trackedBugsRegistrySet.add(clickedLineRowElement);
+                clickedLineRowElement.classList.add('bg-rose-950/60', 'border', 'border-rose-800/80');
+                iconMarkerElement.className = "fa-solid fa-circle-exclamation text-rose-400 status-icon";
+                
+                resolvedBugsCount++;
+                countDisplayLabel.innerText = resolvedBugsCount;
+                
+                stateAlertBox.innerHTML = `<span class="text-rose-400 font-bold"><i class="fa-solid fa-bug mr-1"></i> ${feedbackDescriptionAlert}</span>`;
+            }
+            
+            if(resolvedBugsCount === 3) {
+                stateAlertBox.className = "mt-2 text-xs bg-emerald-950 text-emerald-400 p-2.5 rounded border border-emerald-800 text-center font-bold animate-pulse";
+                stateAlertBox.innerHTML = `<i class="fa-solid fa-trophy mr-1.5"></i> Outstanding! All 3 syntax bugs tracked and mitigated cleanly!`;
+            }
+        } else {
+            clickedLineRowElement.classList.add('bg-slate-800/40', 'opacity-60');
+            iconMarkerElement.className = "fa-solid fa-check text-slate-600 status-icon";
+            stateAlertBox.innerHTML = `<span class="text-slate-400"><i class="fa-solid fa-circle-info mr-1"></i> That line is standard Python syntax. Try inspecting alternative sequences!</span>`;
+        }
+    }
+
+    // Interactive Core Module 4: Simple Assignment Verification Check Validation Logic
+    function verifyAssignmentSubmission() {
+        const inputFieldValue = document.getElementById('assignment-input-box').value.trim().toLowerCase();
+        const displayFeedbackContainer = document.getElementById('assignment-feedback-banner');
+
+        displayFeedbackContainer.classList.remove('hidden', 'bg-emerald-950', 'text-emerald-400', 'bg-rose-950', 'text-rose-400', 'border');
+
+        if(inputFieldValue === 'pop') {
+            displayFeedbackContainer.className = "text-xs font-bold text-center p-2.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 mt-2 block";
+            displayFeedbackContainer.innerHTML = `<i class="fa-solid fa-certificate mr-1.5"></i> Pass! pop(0) targets index 0 directly to clear memory allocations cleanly.`;
+        } else if(inputFieldValue === 'remove') {
+            displayFeedbackContainer.className = "text-xs font-bold text-center p-2.5 rounded bg-rose-950 text-rose-400 border border-rose-800 mt-2 block";
+            displayFeedbackContainer.innerHTML = `<i class="fa-solid fa-circle-nodes mr-1.5"></i> Close, but remove() targets string element matches (e.g. remove("kiwi")), not numerical indexes. Use pop()!`;
+        } else {
+            displayFeedbackContainer.className = "text-xs font-bold text-center p-2.5 rounded bg-rose-950 text-rose-400 border border-rose-800 mt-2 block";
+            displayFeedbackContainer.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Incorrect approach. Hint: Think of the built-in dynamic stack function that references integer index positions!`;
+        }
+    }
+</script>
+
+</body>
+</html>
