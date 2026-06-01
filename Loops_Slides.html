@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastering Loops in Python</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;600;700&family=Lexend:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #0f172a;
+            --accent: #10b981;
+            --amber: #f59e0b;
+            --bg-slide: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            margin: 0;
+            overflow: hidden;
+            color: var(--secondary);
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 4rem;
+            background: var(--bg-slide);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease-in-out, visibility 0.4s;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        h1, h2, h3 { font-family: 'Lexend', sans-serif; }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .flow-panel {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 380px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .fp-head {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .fp-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+        .badge-blue { background: var(--primary); }
+        .badge-amber { background: var(--amber); }
+
+        .flow-svg { width: 100%; height: auto; }
+
+        /* Flowchart shape styles */
+        .fc-start-end { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.5; }
+        .fc-process { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+        .fc-diamond { fill: #eff6ff; stroke: #3b82f6; stroke-width: 1.5; }
+        .fc-edge { stroke: #cbd5e1; stroke-width: 2; fill: none; }
+        .fc-dashed { stroke: #cbd5e1; stroke-width: 2; stroke-dasharray: 4; fill: none; }
+        
+        .fc-txt { font-size: 11px; text-anchor: middle; font-weight: 600; fill: #1e293b; }
+        .fc-txt-sm { font-size: 9px; text-anchor: middle; fill: #64748b; }
+        .fc-lbl-y { font-size: 9px; font-weight: bold; fill: var(--accent); }
+        .fc-lbl-n { font-size: 9px; font-weight: bold; fill: #ef4444; }
+
+        /* Animation highlighting */
+        .active-node {
+            stroke: var(--primary) !important;
+            stroke-width: 3 !important;
+            filter: drop-shadow(0 0 5px rgba(37, 99, 235, 0.4));
+            transition: all 0.3s;
+        }
+
+        .active-path {
+            stroke: var(--primary) !important;
+            stroke-width: 3 !important;
+            transition: all 0.3s;
+        }
+
+        .step-info {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            background: #dbeafe;
+            color: #1e40af;
+            text-align: center;
+            min-height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .step-info.amb { background: #fef3c7; color: #92400e; }
+
+        .anim-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .ctrl-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .btn-play { background: var(--primary); color: white; }
+        .btn-play:hover { background: #1d4ed8; }
+        .btn-play.amb { background: var(--amber); }
+        .btn-reset { background: #e2e8f0; color: #475569; }
+
+        .i-badge {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+
+        /* Navigation hints */
+        .nav-hint {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 100;
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+        .key-box {
+            background: #334155;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active bg-slate-900 flex flex-col items-center justify-center text-center">
+            <div class="space-y-6">
+                <div class="inline-block p-3 px-6 bg-blue-600 rounded-full text-white font-bold text-sm tracking-widest mb-4">PYTHON PROGRAMMING</div>
+                <h1 class="text-7xl font-extrabold text-white">Loops</h1>
+                <p class="text-2xl text-slate-400 max-w-2xl">Iteration with For & While Loops</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Intro -->
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-8 border-l-8 border-blue-600 pl-6">Why Use Loops?</h2>
+            <p class="text-xl leading-relaxed">Loops are used to execute a block of code repeatedly until a condition is met or all items in a sequence are processed.</p>
+            <br></br>
+            <p class="text-xl leading-relaxed">The two types of loops used in python are:</p><br>
+                <ul class="space-y-4">
+                    <li class="flex items-center gap-3 text-lg"><i class="fa-solid fa-check-circle text-emerald-500"></i> For Loops</li>
+                    <li class="flex items-center gap-3 text-lg"><i class="fa-solid fa-check-circle text-emerald-500"></i> While Loops</li>
+                </ul>
+            <div class="grid grid-cols-2 gap-12 items-center flex-grow">
+                <div class="space-y-8">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-blue-100 p-4 rounded-2xl text-blue-600"><i class="fa-solid fa-repeat fa-2x"></i></div>
+                        <div>
+                            <h3 class="text-xl font-bold">Automation</h3>
+                            <p class="text-slate-600">Handle repetitive tasks without writing the same line multiple times.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="bg-emerald-100 p-4 rounded-2xl text-emerald-600"><i class="fa-solid fa-code fa-2x"></i></div>
+                        <div>
+                            <h3 class="text-xl font-bold">DRY Principle</h3>
+                            <p class="text-slate-600">"Don't Repeat Yourself." Clean code is maintainable code.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="bg-purple-100 p-4 rounded-2xl text-purple-600"><i class="fa-solid fa-database fa-2x"></i></div>
+                        <div>
+                            <h3 class="text-xl font-bold">Data Processing</h3>
+                            <p class="text-slate-600">Essential for processing lists, files, and user inputs.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-50 rounded-3xl p-12 text-center border-2 border-dashed border-slate-200">
+                    <i class="fa-solid fa-arrows-spin fa-spin text-9xl text-blue-600 opacity-20 mb-8"></i>
+                    <p class="text-xl font-medium text-slate-500 italic">"Computers are good at doing the same thing over and over again. Loops are how we tell them to do it."</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: For Loop Basics -->
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-8 border-l-8 border-blue-600 pl-6">The For Loop</h2>
+            <div class="grid grid-cols-2 gap-12">
+                <div class="space-y-6">
+                    <p class="text-xl leading-relaxed">A <code>for</code> loop is used for iterating over a sequence (list, tuple, dictionary, set, or string).</p>
+                    <div class="code-block">
+                        <span class="text-pink-400">for</span> variable <span class="text-pink-400">in</span> sequence:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-400"># Code to be executed</span>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-3 text-lg"><i class="fa-solid fa-check-circle text-emerald-500"></i> Iterates over a sequence</li>
+                        <li class="flex items-center gap-3 text-lg"><i class="fa-solid fa-check-circle text-emerald-500"></i> Automatic assignment</li>
+                        <li class="flex items-center gap-3 text-lg"><i class="fa-solid fa-check-circle text-emerald-500"></i> Can be used to iterate over collections like lists, tuples, and dictionaries</li>
+                        <li class="flex items-center gap-3 text-lg"><i class="fa-solid fa-check-circle text-emerald-500"></i> Instead of sequence, you can use range() function</li>
+
+                    </ul>
+                </div>
+                    <div class="code-block h-fit">
+                        <span class="text-pink-400">fruits</span> = [<span class="text-emerald-400">"apple"</span>, <span class="text-emerald-400">"banana"</span>]<br>
+                        <span class="text-pink-400">for</span> fruit <span class="text-pink-400">in</span> fruits:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-sky-400">print</span>(fruit)<br><br>
+                        <span class="text-slate-400"># Output:</span><br>
+                        <span class="text-emerald-400">apple</span><br>
+                        <span class="text-emerald-400">banana</span>
+                    </div>
+                    
+                
+            </div>
+        </div>
+
+        <!-- Slide 4: range() Function -->
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-8 border-l-8 border-indigo-600 pl-6">The range() Function</h2>
+            <div class="grid grid-cols-2 gap-12 flex-grow">
+                <div class="space-y-6 flex flex-col">
+                    <p class="text-xl">To loop through a set of code a specified number of times, we use <code>range()</code>.</p>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-indigo-50 rounded-xl border-l-4 border-indigo-500">
+                            <p class="font-bold text-indigo-800">range(start, stop, step)</p>
+                            <p class="text-sm text-slate-600">range(0, 5, 1) &rarr; 0, 1, 2, 3, 4</p>
+                        </div>
+                        <div class="p-4 bg-indigo-50 rounded-xl border-l-4 border-indigo-500">
+                            <p class="font-bold text-indigo-800">range(start, stop)</p>
+                            <p class="text-sm text-slate-600">range(2, 6) &rarr; 2, 3, 4, 5</p>
+                        </div>
+                        <div class="p-4 bg-indigo-50 rounded-xl border-l-4 border-indigo-500">
+                            <p class="font-bold text-indigo-800">range(stop)</p>
+                            <p class="text-sm text-slate-600">range(5) &rarr; 0, 1, 2, 3, 4</p>
+                        </div>
+
+
+                    </div>
+                    <div class="code-block h-fit">
+                    <span class="text-slate-400"># Counting by 2s</span><br>
+                    <span class="text-pink-400">for</span> i <span class="text-pink-400">in</span> <span class="text-sky-400">range</span>(<span class="text-orange-400">0, 6, 2</span>):<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-sky-400">print</span>(i)<br><br>
+                    <span class="text-slate-400"># Output:</span><br>
+                    <span class="text-emerald-400">0</span><br>
+                    <span class="text-emerald-400">2</span><br>
+                    <span class="text-emerald-400">4</span>
+                </div>
+                </div>
+                                <!-- Animated For Flowchart -->
+                <div class="flex justify-center">
+                    <div class="flow-panel">
+                        <div class="fp-head">
+                            <span class="fp-badge badge-blue">FOR</span>
+                            for i in range(3): print("Hi!")
+                        </div>
+                        <svg class="flow-svg" viewBox="0 0 210 290">
+                            <defs>
+                                <marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+                                    <path d="M0,0 L0,6 L7,3 z" fill="#cbd5e1"/>
+                                </marker>
+                            </defs>
+                            <rect id="f-start" x="65" y="8" width="80" height="26" rx="13" class="fc-start-end"/>
+                            <text x="105" y="21" class="fc-txt">START</text>
+                    
+                            <line id="f-p1" x1="105" y1="34" x2="105" y2="50" class="fc-edge" marker-end="url(#arr)"/>
+                    
+                            <rect id="f-init" x="42" y="50" width="126" height="26" rx="4" class="fc-process"/>
+                            <text x="105" y="63" class="fc-txt-sm">i = 0  (range starts)</text>
+                    
+                            <line id="f-p2" x1="105" y1="76" x2="105" y2="97" class="fc-edge" marker-end="url(#arr)"/>
+                    
+                            <polygon id="f-cond" points="105,97 163,122 105,147 47,122" class="fc-diamond"/>
+                            <text x="105" y="118" class="fc-txt" style="font-size:10px">i &lt; 3?</text>
+                            <text x="105" y="130" class="fc-txt-sm">(in range?)</text>
+                    
+                            <line id="f-p3" x1="105" y1="147" x2="105" y2="165" class="fc-edge" marker-end="url(#arr)"/>
+                            <text x="110" y="159" class="fc-lbl-y">YES</text>
+                    
+                            <rect id="f-print" x="42" y="165" width="126" height="26" rx="4" class="fc-process"/>
+                            <text x="105" y="178" class="fc-txt-sm">print("Hi!")</text>
+                    
+                            <line id="f-p4" x1="105" y1="191" x2="105" y2="210" class="fc-edge" marker-end="url(#arr)"/>
+                    
+                            <rect id="f-inc" x="42" y="210" width="126" height="26" rx="4" class="fc-process"/>
+                            <text x="105" y="223" class="fc-txt-sm">i += 1  (automatic)</text>
+                    
+                            <path id="f-p5" d="M42,223 L20,223 L20,122 L47,122" class="fc-dashed" marker-end="url(#arr)"/>
+                    
+                            <line id="f-p6" x1="163" y1="122" x2="190" y2="122" class="fc-edge" marker-end="url(#arr)"/>
+                            <text x="166" y="116" class="fc-lbl-n">NO</text>
+                    
+                            <rect id="f-end" x="176" y="109" width="30" height="26" rx="13" class="fc-start-end"/>
+                            <text x="191" y="122" class="fc-txt" style="font-size:9.5px">END</text>
+                        </svg>
+                        <div class="step-info" id="for-info">Press Play to animate</div>
+                        <div class="anim-row">
+                            <span class="i-badge" id="for-ibadge">i = —</span>
+                            <button class="ctrl-btn btn-play" id="for-btn" onclick="playFor()">▶ Play</button>
+                            <button class="ctrl-btn btn-reset" onclick="resetFor()">↺ Reset</button>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                
+            </div>
+        </div>
+
+        <!-- NEW SLIDE: Nested Loops -->
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-8 border-l-8 border-violet-600 pl-6">Nested Loops</h2>
+            <div class="grid grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <p class="text-xl">A loop inside another loop. The "inner loop" will be executed one time for each iteration of the "outer loop".</p>
+                    <div class="code-block text-lg">
+                        <span class="text-pink-400">for</span> x <span class="text-pink-400">in</span> [<span class="text-emerald-400">"A"</span>, <span class="text-emerald-400">"B"</span>]:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">for</span> y <span class="text-pink-400">in</span> <span class="text-sky-400">range</span>(<span class="text-orange-400">2</span>):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-sky-400">print</span>(x, y)
+                    </div>
+                </div>
+                <div class="bg-violet-50 p-8 rounded-3xl border-2 border-violet-100">
+                    <h3 class="font-bold text-violet-800 mb-4 text-xl">Output visualization:</h3>
+                    <div class="grid grid-cols-2 gap-4 font-mono text-center">
+                        <div class="p-3 bg-white rounded-lg shadow-sm border border-violet-200">A 0</div>
+                        <div class="p-3 bg-white rounded-lg shadow-sm border border-violet-200">A 1</div>
+                        <div class="p-3 bg-white rounded-lg shadow-sm border border-violet-200">B 0</div>
+                        <div class="p-3 bg-white rounded-lg shadow-sm border border-violet-200">B 1</div>
+                    </div>
+                    <p class="mt-6 text-sm text-slate-500 italic">Commonly used for 2D grids, matrices, and combining sets of data.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: While Loop Basics -->
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-8 border-l-8 border-amber-500 pl-6">The While Loop</h2>
+            <div class="grid grid-cols-2 gap-12">
+                <div class="space-y-6">
+                    <p class="text-xl leading-relaxed">A <code>while</code> loop repeats code as long as a certain boolean condition remains <strong>True</strong>.</p>
+                    <div class="code-block border-l-4 border-amber-500">
+                        i = <span class="text-orange-400">0</span><br>
+                        <span class="text-pink-400">while</span> i &lt; <span class="text-orange-400">3</span>:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-sky-400">print</span>(i)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;i += <span class="text-orange-400">1</span>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-3 text-lg"><i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Condition-based execution</li>
+                        <li class="flex items-center gap-3 text-lg"><i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Manual management of variables</li>
+                        <li class="flex items-center gap-3 text-lg"><i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Risk of infinite loops</li>
+                    </ul>
+                </div>
+                <!-- Animated While Flowchart -->
+                <div class="flex justify-center">
+                    <div class="flow-panel">
+                        <div class="fp-head">
+                            <span class="fp-badge badge-amber">WHILE</span>
+                            i=0; while i&lt;3: print("Hi!"); i+=1
+                        </div>
+                        <svg class="flow-svg" viewBox="0 0 210 290">
+                            <rect id="w-start" x="65" y="8" width="80" height="26" rx="13" class="fc-start-end"/>
+                            <text x="105" y="21" class="fc-txt">START</text>
+                    
+                            <line id="w-p1" x1="105" y1="34" x2="105" y2="50" class="fc-edge" marker-end="url(#arr)"/>
+                    
+                            <rect id="w-init" x="42" y="50" width="126" height="26" rx="4" class="fc-process"/>
+                            <text x="105" y="63" class="fc-txt-sm">i = 0  (set manually)</text>
+                    
+                            <line id="w-p2" x1="105" y1="76" x2="105" y2="97" class="fc-edge" marker-end="url(#arr)"/>
+                    
+                            <polygon id="w-cond" points="105,97 163,122 105,147 47,122" class="fc-diamond"/>
+                            <text x="105" y="118" class="fc-txt" style="font-size:10px">i &lt; 3?</text>
+                            <text x="105" y="130" class="fc-txt-sm">(condition)</text>
+                    
+                            <line id="w-p3" x1="105" y1="147" x2="105" y2="165" class="fc-edge" marker-end="url(#arr)"/>
+                            <text x="110" y="159" class="fc-lbl-y">YES</text>
+                    
+                            <rect id="w-print" x="42" y="165" width="126" height="26" rx="4" class="fc-process"/>
+                            <text x="105" y="178" class="fc-txt-sm">print("Hi!")</text>
+                    
+                            <line id="w-p4" x1="105" y1="191" x2="105" y2="210" class="fc-edge" marker-end="url(#arr)"/>
+                    
+                            <rect id="w-inc" x="42" y="210" width="126" height="26" rx="4" class="fc-process"/>
+                            <text x="105" y="223" class="fc-txt-sm">i += 1  ⚠ manual!</text>
+                    
+                            <path id="w-p5" d="M42,223 L20,223 L20,122 L47,122" class="fc-dashed" marker-end="url(#arr)"/>
+                    
+                            <line id="w-p6" x1="163" y1="122" x2="190" y2="122" class="fc-edge" marker-end="url(#arr)"/>
+                            <text x="166" y="116" class="fc-lbl-n">NO</text>
+                    
+                            <rect id="w-end" x="176" y="109" width="30" height="26" rx="13" class="fc-start-end"/>
+                            <text x="191" y="122" class="fc-txt" style="font-size:9.5px">END</text>
+                        </svg>
+                        <div class="step-info amb" id="while-info">Press Play to animate</div>
+                        <div class="anim-row">
+                            <span class="i-badge" id="while-ibadge">i = —</span>
+                            <button class="ctrl-btn btn-play amb" id="while-btn" onclick="playWhile()">▶ Play</button>
+                            <button class="ctrl-btn btn-reset" onclick="resetWhile()">↺ Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW SLIDE: Infinite Loops -->
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-8 border-l-8 border-red-600 pl-6">Infinite Loops & Safety</h2>
+            <div class="grid grid-cols-2 gap-8">
+                <div class="p-8 bg-red-50 rounded-2xl border-2 border-red-100">
+                    <h3 class="text-red-700 font-bold mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-skull-crossbones"></i> The Problem
+                    </h3>
+                    <p class="text-slate-700 mb-4">An infinite loop occurs when the condition <strong>never</strong> becomes False.</p>
+                    <div class="code-block bg-red-950 text-sm">
+                        i = <span class="text-orange-400">1</span><br>
+                        <span class="text-pink-400">while</span> i > <span class="text-orange-400">0</span>:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-sky-400">print</span>(<span class="text-emerald-400">"Looping forever!"</span>)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-slate-500"># i is never changed!</span>
+                    </div>
+                </div>
+                <div class="p-8 bg-emerald-50 rounded-2xl border-2 border-emerald-100">
+                    <h3 class="text-emerald-700 font-bold mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved"></i> How to Avoid
+                    </h3>
+                    <ul class="space-y-4 text-slate-700">
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-600 mt-1"></i> <strong>Update Variables:</strong> Ensure the loop variable changes (e.g., <code>i += 1</code>).</li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-600 mt-1"></i> <strong>Use Break:</strong> Add a safety <code>break</code> if a secondary condition is met.</li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-600 mt-1"></i> <strong>Test Logic:</strong> Trace your condition values before running.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Control Statements (UPDATED with PASS) -->
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-8 border-l-8 border-rose-500 pl-6">Loop Control</h2>
+            <div class="grid grid-cols-3 gap-6 flex-grow">
+                <div class="p-6 bg-rose-50 rounded-2xl border-2 border-rose-100 flex flex-col">
+                    <div class="flex items-center gap-3 mb-3 text-rose-600">
+                        <i class="fa-solid fa-circle-stop fa-lg"></i>
+                        <h3 class="text-xl font-bold">break</h3>
+                    </div>
+                    <p class="text-sm text-slate-700 mb-4">Stops the loop entirely.</p>
+                    <div class="code-block">
+                        <span class="text-pink-400">if</span> condition: <span class="text-pink-400">break</span>
+                    </div><br></br>
+                    <div class="code-block font-mono">
+                      <span class="text-pink-400">for</span> i <span class="text-pink-400">in</span> range(5):<br>
+                      &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">if</span> i == 3:<br>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">break</span><br>
+                      &nbsp;&nbsp;&nbsp;&nbsp;print(i)<br><br>
+
+                      <span class="text-slate-400"># Output:</span><br>
+                      <span class="text-slate-400"># 0</span><br>
+                      <span class="text-slate-400"># 1</span><br>
+                      <span class="text-slate-400"># 2</span>
+                  </div>
+                </div>
+                <div class="p-6 bg-emerald-50 rounded-2xl border-2 border-emerald-100 flex flex-col">
+                    <div class="flex items-center gap-3 mb-3 text-emerald-600">
+                        <i class="fa-solid fa-forward-step fa-lg"></i>
+                        <h3 class="text-xl font-bold">continue</h3>
+                    </div>
+                    <p class="text-sm text-slate-700 mb-4">Skips current iteration.</p>
+                    <div class="code-block font-mono">
+                        <span class="text-pink-400">if</span> condition: <span class="text-pink-400">continue</span>
+                    </div><br></br>
+                    <div class="code-block font-mono">
+                      <span class="text-pink-400">for</span> i <span class="text-pink-400">in</span> range(5):<br>
+                      &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">if</span> i == 2:<br>
+                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">continue</span><br>
+                      &nbsp;&nbsp;&nbsp;&nbsp;print(i)<br><br>
+
+                      <span class="text-slate-400"># Output:</span><br>
+                      <span class="text-slate-400"># 0</span><br>
+                      <span class="text-slate-400"># 1</span><br>
+                      <span class="text-slate-400"># 3</span><br>
+                      <span class="text-slate-400"># 4</span>
+                  </div>
+                </div>
+                <!-- Added Pass -->
+                <div class="p-6 bg-blue-50 rounded-2xl border-2 border-blue-100 flex flex-col">
+                    <div class="flex items-center gap-3 mb-3 text-blue-600">
+                        <i class="fa-solid fa-ghost fa-lg"></i>
+                        <h3 class="text-xl font-bold">pass</h3>
+                    </div>
+                    <p class="text-sm text-slate-700 mb-4">A null placeholder. Does nothing, used to avoid syntax errors.</p>
+                    <div class="code-block font-mono">
+                        <span class="text-pink-400">for</span> x <span class="text-pink-400">in</span> data:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">pass</span> <span class="text-slate-400"># Fill later</span>
+                    </div>
+<br></br>
+                    <div class="code-block font-mono">
+                        <span class="text-pink-400">for</span> i <span class="text-pink-400">in</span> range(3):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">if</span> i == 1:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-pink-400">pass</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;print(i)<br><br>
+
+                        <span class="text-slate-400"># Output:</span><br>
+                        <span class="text-slate-400"># 0</span><br>
+                        <span class="text-slate-400"># 1</span><br>
+                        <span class="text-slate-400"># 2</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Comparison -->
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-8 border-l-8 border-slate-700 pl-6">For vs. While</h2>
+            <div class="flex-grow flex items-center">
+                <table class="w-full text-left rounded-xl overflow-hidden shadow-lg">
+                    <thead class="bg-slate-800 text-white">
+                        <tr>
+                            <th class="p-6 text-xl">Feature</th>
+                            <th class="p-6 text-xl">For Loop</th>
+                            <th class="p-6 text-xl">While Loop</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-lg">
+                        <tr class="bg-white border-b border-slate-100">
+                            <td class="p-6 font-bold">Primary Use</td>
+                            <td class="p-6 text-slate-600">Iterating collections / fixed steps</td>
+                            <td class="p-6 text-slate-600">Repeating until logic changes</td>
+                        </tr>
+                        <tr class="bg-slate-50 border-b border-slate-100">
+                            <td class="p-6 font-bold">Control</td>
+                            <td class="p-6 text-slate-600">Handled by iterator</td>
+                            <td class="p-6 text-slate-600">Handled by manual condition</td>
+                        </tr>
+                        <tr class="bg-white">
+                            <td class="p-6 font-bold">Best For...</td>
+                            <td class="p-6 text-slate-600">Predictable repetitions</td>
+                            <td class="p-6 text-slate-600">Event-driven loops</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Slide 8: Q&A -->
+        <div class="slide bg-slate-900 text-white flex flex-col items-center justify-center">
+            <h2 class="text-8xl font-black mb-6">Questions?</h2>
+        </div>
+    </div>
+
+    <!-- UI Elements -->
+    <div class="progress-bar" id="progress"></div>
+    <div class="nav-hint">
+        <span>Use <span class="key-box">&larr;</span> <span class="key-box">&rarr;</span> to navigate</span>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress');
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            const progressWidth = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progressWidth}%`;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                if (currentSlide < slides.length - 1) {
+                    currentSlide++;
+                    updateSlide();
+                }
+            } else if (e.key === 'ArrowLeft') {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateSlide();
+                }
+            }
+        });
+
+        const sleep = ms => new Promise(res => setTimeout(res, ms));
+
+        async function playFor() {
+            const btn = document.getElementById('for-btn');
+            const info = document.getElementById('for-info');
+            const ibadge = document.getElementById('for-ibadge');
+            btn.disabled = true;
+            resetFor();
+
+            const highlight = async (id, pathId, text) => {
+                const node = document.getElementById(id);
+                const path = pathId ? document.getElementById(pathId) : null;
+                if (node) node.classList.add('active-node');
+                if (path) path.classList.add('active-path');
+                info.innerText = text;
+                await sleep(800);
+            };
+
+            const unhighlight = (id, pathId) => {
+                const node = document.getElementById(id);
+                const path = pathId ? document.getElementById(pathId) : null;
+                if (node) node.classList.remove('active-node');
+                if (path) path.classList.remove('active-path');
+            };
+
+            await highlight('f-start', 'f-p1', 'Program starts...');
+            unhighlight('f-start', 'f-p1');
+
+            await highlight('f-init', 'f-p2', 'Initialize: range(3) starts at 0');
+            ibadge.innerText = 'i = 0';
+            unhighlight('f-init', 'f-p2');
+
+            for (let i = 0; i < 3; i++) {
+                ibadge.innerText = `i = ${i}`;
+                await highlight('f-cond', 'f-p3', `Check: Is i (${i}) < 3? YES`);
+                unhighlight('f-cond', 'f-p3');
+
+                await highlight('f-print', 'f-p4', `Action: Print "Hi!" (Iter ${i+1})`);
+                unhighlight('f-print', 'f-p4');
+
+                await highlight('f-inc', 'f-p5', `Automatic: i moves to next value`);
+                unhighlight('f-inc', 'f-p5');
+            }
+
+            ibadge.innerText = 'i = 3';
+            await highlight('f-cond', 'f-p6', 'Check: Is i (3) < 3? NO');
+            unhighlight('f-cond', 'f-p6');
+
+            await highlight('f-end', null, 'Loop Finished!');
+            btn.disabled = false;
+        }
+
+        function resetFor() {
+            document.querySelectorAll('.active-node').forEach(el => el.classList.remove('active-node'));
+            document.querySelectorAll('.active-path').forEach(el => el.classList.remove('active-path'));
+            document.getElementById('for-info').innerText = 'Press Play to animate';
+            document.getElementById('for-ibadge').innerText = 'i = —';
+        }
+
+        async function playWhile() {
+            const btn = document.getElementById('while-btn');
+            const info = document.getElementById('while-info');
+            const ibadge = document.getElementById('while-ibadge');
+            btn.disabled = true;
+            resetWhile();
+
+            const highlight = async (id, pathId, text) => {
+                const node = document.getElementById(id);
+                const path = pathId ? document.getElementById(pathId) : null;
+                if (node) node.classList.add('active-node');
+                if (path) path.classList.add('active-path');
+                info.innerText = text;
+                await sleep(800);
+            };
+
+            const unhighlight = (id, pathId) => {
+                const node = document.getElementById(id);
+                const path = pathId ? document.getElementById(pathId) : null;
+                if (node) node.classList.remove('active-node');
+                if (path) path.classList.remove('active-path');
+            };
+
+            await highlight('w-start', 'w-p1', 'Program starts...');
+            unhighlight('w-start', 'w-p1');
+
+            await highlight('w-init', 'w-p2', 'Manual Init: i set to 0');
+            ibadge.innerText = 'i = 0';
+            let i = 0;
+            unhighlight('w-init', 'w-p2');
+
+            while (i < 3) {
+                await highlight('w-cond', 'w-p3', `Check: i (${i}) < 3? YES`);
+                unhighlight('w-cond', 'w-p3');
+
+                await highlight('w-print', 'w-p4', `Action: Print "Hi!"`);
+                unhighlight('w-print', 'w-p4');
+
+                i++;
+                await highlight('w-inc', 'w-p5', `Update: Manual increment i += 1`);
+                ibadge.innerText = `i = ${i}`;
+                unhighlight('w-inc', 'w-p5');
+            }
+
+            await highlight('w-cond', 'w-p6', 'Check: i (3) < 3? NO');
+            unhighlight('w-cond', 'w-p6');
+
+            await highlight('w-end', null, 'While Loop Finished!');
+            btn.disabled = false;
+        }
+
+        function resetWhile() {
+            document.querySelectorAll('.active-node').forEach(el => el.classList.remove('active-node'));
+            document.querySelectorAll('.active-path').forEach(el => el.classList.remove('active-path'));
+            document.getElementById('while-info').innerText = 'Press Play to animate';
+            document.getElementById('while-ibadge').innerText = 'i = —';
+        }
+        
+        // Final init
+        updateSlide();
+    </script>
+</body>
+</html>

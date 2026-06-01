@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level 3: Basic String Operations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --emerald: #10b981;
+            --amber:   #f59e0b;
+            --sky:     #38bdf8;
+            --violet:  #a78bfa;
+            --rose:    #fb7185;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #0d1117;
+            margin: 0;
+            overflow: hidden;
+            color: #0f172a;
+        }
+
+        /* ── slide system ── */
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 3rem 4rem;
+            background: #f8fafc;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.35s, visibility 0.35s;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .slide.active { opacity: 1; visibility: visible; z-index: 10; }
+
+        /* ── heading font ── */
+        h1, h2, h3 { font-family: 'Nunito', sans-serif; }
+
+        /* ── slide-in animation for content children ── */
+        @keyframes slideUp {
+            from { opacity:0; transform: translateY(22px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+        .slide.active .animate-in {
+            animation: slideUp 0.45s ease both;
+        }
+        .slide.active .animate-in:nth-child(1)  { animation-delay: .05s; }
+        .slide.active .animate-in:nth-child(2)  { animation-delay: .15s; }
+        .slide.active .animate-in:nth-child(3)  { animation-delay: .25s; }
+        .slide.active .animate-in:nth-child(4)  { animation-delay: .35s; }
+        .slide.active .animate-in:nth-child(5)  { animation-delay: .45s; }
+        .slide.active .animate-in:nth-child(6)  { animation-delay: .55s; }
+
+        /* ── code block ── */
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.25rem 1.5rem;
+            border-radius: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        /* ── terminal ── */
+        .terminal-box {
+            background: #020617;
+            border: 2px solid #334155;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        .terminal-header {
+            background: #1e293b;
+            padding: 0.6rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            border-bottom: 1px solid #334155;
+        }
+        .dot { width: 11px; height: 11px; border-radius: 50%; }
+
+        /* ── quiz buttons ── */
+        .quiz-btn {
+            transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+            border: 2px solid #e2e8f0;
+            cursor: pointer;
+        }
+        .quiz-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 14px -2px rgba(0,0,0,.12); }
+
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            25%      { transform: translateX(-8px); }
+            75%      { transform: translateX(8px); }
+        }
+        .shake { animation: shake 0.3s ease-in-out 2; }
+
+        /* ── slide counter ── */
+        #slide-counter {
+            position: fixed;
+            top: 1.35rem;
+            left: 1.5rem;
+            z-index: 200;
+            font-size: 0.8rem;
+            color: #64748b;
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* ── progress bar ── */
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #38bdf8, #a78bfa);
+            transition: width 0.35s ease;
+            z-index: 100;
+        }
+
+        /* ── nav hint ── */
+        .nav-hint {
+            position: fixed;
+            bottom: 1.1rem;
+            right: 1.5rem;
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+            z-index: 100;
+            color: #94a3b8;
+            font-size: 0.72rem;
+        }
+        .key-box {
+            background: #334155;
+            color: #e2e8f0;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+        }
+
+        /* ── anatomy color tokens ── */
+        .token-name   { color: #f87171; font-weight: 700; } /* operator or action */
+        .token-string { color: #fbbf24; font-weight: 700; } /* string content */
+        .token-var    { color: #38bdf8; font-weight: 700; } /* variables */
+        .token-symbol { color: #a78bfa; font-weight: 700; } /* symbols like + or * */
+
+        /* ── bug hunt ── */
+        .bug-line {
+            cursor: pointer;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            transition: background 0.2s;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.05rem;
+        }
+        .bug-line:hover { background: #1e3a5f; }
+        .bug-line.found-bug  { background: #450a0a; border-left: 4px solid #f87171; }
+        .bug-line.clean-line { background: #052e16; border-left: 4px solid #34d399; }
+
+        /* ── editable code input ── */
+        #live-editor {
+            background: transparent;
+            color: #fbbf24;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1rem;
+            border: none;
+            outline: none;
+            resize: none;
+            width: 100%;
+            line-height: 1.7;
+        }
+        #live-editor::placeholder { color: #475569; }
+
+        /* ── challenge cards ── */
+        .challenge-card {
+            border-left: 4px solid;
+            border-radius: 0.75rem;
+            padding: 0.9rem 1.1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            transition: transform 0.2s;
+            cursor: default;
+        }
+        .challenge-card:hover { transform: translateX(4px); }
+
+        /* Interactive Concatenator Blocks */
+        .string-block {
+            transition: all 0.2s ease;
+        }
+        .string-block:hover {
+            transform: scale(1.05);
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="slide-counter">1 / 7</div>
+
+<div id="presentation-container">
+
+    <div class="slide active bg-slate-900 flex flex-col items-center justify-center text-center">
+        <div class="space-y-6">
+            <div class="animate-in inline-flex items-center gap-2 px-5 py-2 bg-sky-500/20 border border-sky-500/40 rounded-full text-sky-400 font-bold text-sm tracking-widest uppercase">
+                <i class="fa-solid fa-code text-sky-400"></i> Level 3: Text Alchemist
+            </div>
+            <h1 class="animate-in text-6xl font-black text-white tracking-tight leading-tight">
+                Mastering Basic<br><span class="text-transparent bg-clip-text bg-gradient-to-r bg-sky-400 to-violet-400">String Operations</span>
+            </h1>
+            <p class="animate-in text-xl text-slate-400 max-w-xl mx-auto">Learn to glue, multiply, measure, and dissect text like a true Python wizard!</p>
+            <div class="animate-in flex items-center justify-center gap-8 pt-4 text-slate-500 text-sm">
+                <span><i class="fa-solid fa-layer-group mr-1"></i>7 slides</span>
+                <span><i class="fa-solid fa-keyboard mr-1"></i>Use arrow keys to navigate</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 class="animate-in text-4xl font-black text-slate-800 mb-2 border-l-8 border-sky-500 pl-5">The String Toolkit 🛠️</h2>
+        <p class="animate-in text-lg text-slate-500 mb-6">Strings aren't just dead text. Python gives us built-in math operators and functions to dynamically manipulate them.</p>
+
+        <div class="grid grid-cols-3 gap-6 flex-grow items-stretch">
+            <div class="animate-in bg-sky-50 border border-sky-100 rounded-2xl p-6 flex flex-col gap-3 string-block">
+                <div class="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center text-sky-600 text-xl"><i class="fa-solid fa-link"></i></div>
+                <h3 class="text-xl font-black text-slate-800">Concatenation (+)</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Gluing two or more text strings together back-to-back. An addition operator for text blocks!</p>
+                <code class="text-xs bg-slate-800 text-sky-300 p-2 rounded mt-auto font-mono">"Py" + "thon" &rarr; "Python"</code>
+            </div>
+            <div class="animate-in bg-violet-50 border border-violet-100 rounded-2xl p-6 flex flex-col gap-3 string-block">
+                <div class="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center text-violet-600 text-xl"><i class="fa-solid fa-clone"></i></div>
+                <h3 class="text-xl font-black text-slate-800">Replication (*)</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Repeating a piece of text multiple times using multiplication. Must match a string with an integer!</p>
+                <code class="text-xs bg-slate-800 text-violet-300 p-2 rounded mt-auto font-mono">"Hi!" * 3 &rarr; "Hi!Hi!Hi!"</code>
+            </div>
+            <div class="animate-in bg-amber-50 border border-amber-100 rounded-2xl p-6 flex flex-col gap-3 string-block">
+                <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 text-xl"><i class="fa-solid fa-ruler-horizontal"></i></div>
+                <h3 class="text-xl font-black text-slate-800">Length calculation</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">The <code class="bg-amber-200 text-amber-900 px-1 rounded">len()</code> global function counts every single character inside your string, including spaces and punctuation!</p>
+                <code class="text-xs bg-slate-800 text-amber-300 p-2 rounded mt-auto font-mono">len("A B") &rarr; 3</code>
+            </div>
+        </div>
+
+        <div class="animate-in mt-6 bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-center gap-4">
+            <span class="text-3xl">⚠️</span>
+            <p class="text-slate-700 text-sm"><strong>The Static Rule:</strong> You cannot mix string math operations illegally. Trying to do <code class="font-mono bg-white px-1 rounded text-red-500">"Hello" + 5</code> will smash your program into a screeching <code class="font-mono text-red-600 font-bold">TypeError</code>!</p>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 class="animate-in text-4xl font-black text-slate-800 mb-2 border-l-8 border-violet-500 pl-5">Anatomy of String Operations 🔍</h2>
+        <p class="animate-in text-lg text-slate-500 mb-6">Let's look at how text parts interact with operators and variable bindings.</p>
+
+        <div class="animate-in bg-slate-800 rounded-2xl p-6 mb-6 font-mono text-3xl text-center tracking-wide shadow-xl">
+            <span class="token-var">msg</span> = <span class="token-string">"Code"</span> <span class="token-symbol">+</span> <span class="token-string">"✨"</span> <span class="token-symbol">*</span> <span class="token-name">2</span>
+        </div>
+
+        <div class="flex flex-col gap-3 flex-grow justify-center max-w-3xl mx-auto w-full">
+            <div class="animate-in flex items-center gap-5 p-4 bg-sky-50 rounded-xl border-l-4 border-sky-500">
+                <code class="font-mono font-bold text-xl text-sky-600 min-w-[120px]">"Code", "✨"</code>
+                <p class="text-slate-700 text-base">The <strong>String Literals</strong> — raw text values wrapped inside matching quotes. Python sees these directly as string components.</p>
+                <span class="ml-auto text-2xl">🟡</span>
+            </div>
+            <div class="animate-in flex items-center gap-5 p-4 bg-violet-50 rounded-xl border-l-4 border-violet-500">
+                <code class="font-mono font-bold text-xl text-violet-600 min-w-[120px]">+ Operator</code>
+                <p class="text-slate-700 text-base">The <strong>Concatenator</strong> — joins strings end-to-end. Notice that Python performs multiplication first due to math precedence rule!</p>
+                <span class="ml-auto text-2xl">🔵</span>
+            </div>
+            <div class="animate-in flex items-center gap-5 p-4 bg-rose-50 rounded-xl border-l-4 border-rose-500">
+                <code class="font-mono font-bold text-xl text-rose-600 min-w-[120px]">* 2</code>
+                <p class="text-slate-700 text-base">The <strong>Multiplier Sequence</strong> — duplicates the string <code class="font-mono">"✨"</code> twice resulting in <code class="font-mono">"✨✨"</code>. It strictly demands a string on one side and an integer on the other!</p>
+                <span class="ml-auto text-2xl">🔴</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 class="animate-in text-4xl font-black text-slate-800 mb-2 border-l-8 border-sky-500 pl-5">Try It Live! ⚡</h2>
+        <p class="animate-in text-lg text-slate-500 mb-5">Combine text fragments, replicate expressions, or evaluate character lengths in real-time!</p>
+
+        <div class="animate-in grid grid-cols-2 gap-6 items-stretch flex-grow">
+            <div class="flex flex-col bg-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                <div class="flex items-center justify-between px-4 py-3 bg-slate-700 border-b border-slate-600">
+                    <span class="text-sm text-slate-300 font-mono"><i class="fa-solid fa-file-code mr-2 text-sky-400"></i>string_sandbox.py</span>
+                    <span class="text-xs bg-sky-600/30 text-sky-400 px-2 py-0.5 rounded-full border border-sky-500/30">Editable!</span>
+                </div>
+                <div class="p-5 flex-grow">
+                    <textarea id="live-editor" rows="8" spellcheck="false" placeholder="# Test string math rules below!
+print(&quot;Python&quot; + &quot;🔥&quot;)
+print(&quot;Go!&quot; * 3)
+print(len(&quot;Magic Spell&quot;))"></textarea>
+                </div>
+                <button onclick="runLiveCode()" class="m-4 mt-0 bg-sky-500 hover:bg-sky-400 active:scale-95 text-white font-black py-3 rounded-xl transition text-lg flex items-center justify-center gap-2 shadow-lg shadow-sky-900/30">
+                    <i class="fa-solid fa-play"></i> Run Expression Engine
+                </button>
+            </div>
+
+            <div class="terminal-box flex flex-col">
+                <div class="terminal-header">
+                    <div class="dot bg-red-500"></div>
+                    <div class="dot bg-yellow-500"></div>
+                    <div class="dot bg-green-500"></div>
+                    <span class="text-xs text-slate-400 font-mono ml-2">String Engine Shell</span>
+                </div>
+                <div id="live-terminal" class="p-5 font-mono text-base space-y-1 bg-slate-950 flex-grow overflow-y-auto min-h-0">
+                    <span class="text-slate-600"># Click 'Run Expression Engine' to verify evaluation logic...</span>
+                </div>
+            </div>
+        </div>
+        <p class="animate-in text-sm text-slate-400 mt-3 text-center"><i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i>Edge-case rule check: dynamic multiplication by zero <code class="bg-slate-100 px-1 rounded text-slate-700">print("Cat" * 0)</code> returns an empty blank line!</p>
+    </div>
+
+    <div class="slide">
+        <h2 class="animate-in text-4xl font-black text-slate-800 mb-2 border-l-8 border-amber-500 pl-5">🚨 Alchemist Check: Predict Output!</h2>
+        <p class="animate-in text-lg text-slate-500 mb-6">Analyze this compounded sequence: What value gets generated inside the console output?</p>
+
+        <div class="animate-in grid grid-cols-2 gap-8 items-center flex-grow">
+            <div class="space-y-4">
+                <div class="code-block text-xl">
+                    <span class="text-sky-400">text</span> = <span class="text-amber-300">"Ab"</span> + <span class="text-amber-300">"a"</span> * <span class="text-emerald-400">2</span><br>
+                    <span class="text-sky-400">result</span> = <span class="text-violet-400">len</span>(<span class="text-sky-400">text</span>)<br>
+                    <span class="text-sky-400">print</span>(<span class="text-sky-400">result</span>)
+                </div>
+                <div class="p-4 bg-slate-100 rounded-xl border border-slate-200">
+                    <p class="text-sm text-slate-600 font-semibold"><i class="fa-solid fa-circle-question text-amber-500 mr-1"></i> Order of Operations Tip:</p>
+                    <p class="text-xs text-slate-500 mt-1">Multiplication binds tighter than concatenation. Calculate replication block before evaluating the addition!</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <div onclick="checkQuizAnswer(this, false, 'Remember Python is case-sensitive and operator preference processes multiplication before the joining plus sign.')" class="quiz-btn p-4 bg-white rounded-xl text-left font-semibold text-slate-700 flex items-center justify-between">
+                    <span>A) 6 (evaluates as "AbaaBa")</span>
+                    <i class="fa-solid fa-circle-notch text-slate-300"></i>
+                </div>
+                <div onclick="checkQuizAnswer(this, true, 'Spot on! The replication constructs &quot;aa&quot;, which joins &quot;Ab&quot; producing &quot;Abaa&quot;. len(&quot;Abaa&quot;) yields 4 characters.')" class="quiz-btn p-4 bg-white rounded-xl text-left font-semibold text-slate-700 flex items-center justify-between">
+                    <span>B) 4 (evaluates as "Abaa")</span>
+                    <i class="fa-solid fa-circle-notch text-slate-300"></i>
+                </div>
+                <div onclick="checkQuizAnswer(this, false, 'Incorrect. Multiplication takes higher precedence. Text is not processed left-to-right as (&quot;Ab&quot;+&quot;a&quot;) times 2.')" class="quiz-btn p-4 bg-white rounded-xl text-left font-semibold text-slate-700 flex items-center justify-between">
+                    <span>C) 6 (evaluates as "AbaAba")</span>
+                    <i class="fa-solid fa-circle-notch text-slate-300"></i>
+                </div>
+                <div onclick="checkQuizAnswer(this, false, 'SyntaxError token clash alert? Nope! This is completely valid Python syntax.')" class="quiz-btn p-4 bg-white rounded-xl text-left font-semibold text-slate-700 flex items-center justify-between">
+                    <span>D) Crashes with a TypeError</span>
+                    <i class="fa-solid fa-circle-notch text-slate-300"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 class="animate-in text-4xl font-black text-slate-800 mb-1 border-l-8 border-rose-500 pl-5">Bug Hunt: Code Sabotage! 🐛</h2>
+        <p class="animate-in text-lg text-slate-500 mb-4">Click exactly <strong>3 buggy lines</strong> to clean them up. Leave stable compilation strings alone!</p>
+
+        <div class="animate-in grid grid-cols-5 gap-6 items-center flex-grow">
+            <div class="col-span-3 bg-slate-900 rounded-2xl p-5 shadow-2xl font-mono text-base text-slate-300 space-y-2 border-2 border-slate-700 relative">
+                <div class="absolute top-3 right-3 text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded">Interactive Terminal</div>
+                
+                <div onclick="toggleBugLine(this, true, 'TypeError: cannot concatenate string and int elements directly without string conversion wrapper!')" class="bug-line">
+                    <span class="text-slate-500 select-none mr-3">1</span><span class="text-sky-400">line1</span> = <span class="text-amber-300">"Score: "</span> + <span class="text-emerald-400">100</span>
+                </div>
+                
+                <div onclick="toggleBugLine(this, false, 'Clean line! String variables multiplied with integer states are perfectly legitimate expression sequences.')" class="bug-line">
+                    <span class="text-slate-500 select-none mr-3">2</span><span class="text-sky-400">line2</span> = <span class="text-amber-300 font-bold">"★"</span> * <span class="text-emerald-400">5</span>
+                </div>
+                
+                <div onclick="toggleBugLine(this, true, 'TypeError: text entities cannot be multiplied with matching text elements together!')" class="bug-line">
+                    <span class="text-slate-500 select-none mr-3">3</span><span class="text-sky-400">line3</span> = <span class="text-amber-300">"Echo"</span> * <span class="text-amber-300">"3"</span>
+                </div>
+                
+                <div onclick="toggleBugLine(this, false, 'Clean line! Global wrapper length reader counts characters inside concatenated strings correctly.')" class="bug-line">
+                    <span class="text-slate-500 select-none mr-3">4</span><span class="text-sky-400">line4</span> = <span class="text-violet-400">len</span>(<span class="text-amber-300">"A"</span> + <span class="text-amber-300">"B"</span>)
+                </div>
+                
+                <div onclick="toggleBugLine(this, true, 'SyntaxError: missing closing string quotes inside length calculation boundaries!')" class="bug-line">
+                    <span class="text-slate-500 select-none mr-3">5</span><span class="text-sky-400">line5</span> = <span class="text-violet-400">len</span>(<span class="text-amber-300">"Missing Paren)</span>
+                </div>
+            </div>
+
+            <div class="col-span-2 flex flex-col gap-4 self-stretch justify-center">
+                <div class="bg-slate-800 text-white rounded-xl p-4 border border-slate-700 shadow-md">
+                    <div class="text-xs uppercase text-slate-400 tracking-wider font-bold mb-1">Bugs Left Counter</div>
+                    <div id="bug-counter" class="text-3xl font-black text-rose-400 font-mono">3 Bugs remaining</div>
+                </div>
+                <div id="bug-feedback" class="p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 font-medium min-h-[100px] flex items-center justify-center italic text-center">
+                    Click lines on the left panel to test parsing integrity...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide bg-slate-900 text-white">
+        <div class="max-w-3xl mx-auto w-full space-y-6 flex flex-col justify-center h-full">
+            <h2 class="animate-in text-5xl font-black text-sky-400 border-b border-slate-800 pb-3"><i class="fa-solid fa-graduation-cap mr-3"></i>String Wizard Level Completed!</h2>
+            <p class="animate-in text-lg text-slate-400">Excellent! You have decoded how text pieces intermix, replicate, and compute dimensions under Python syntax engines.</p>
+            
+            <div class="animate-in grid grid-cols-2 gap-4 pt-2">
+                <div class="challenge-card bg-slate-800/50 border-sky-500 text-slate-300">
+                    <div>
+                        <div class="font-bold text-white mb-1"><i class="fa-solid fa-circle-nodes text-sky-400 mr-2"></i>Concatenation Rule</div>
+                        <div class="text-xs text-slate-400">Always preserve clean matching borders. Cast integers using <code class="bg-slate-900 text-amber-300 px-1 rounded">str(value)</code> blocks.</div>
+                    </div>
+                </div>
+                <div class="challenge-card bg-slate-800/50 border-violet-500 text-slate-300">
+                    <div>
+                        <div class="font-bold text-white mb-1"><i class="fa-solid fa-calculator text-violet-400 mr-2"></i>Precedence System</div>
+                        <div class="text-xs text-slate-400">Remember string replication operators match math priority tables exactly. Use braces to force overrides!</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="animate-in bg-gradient-to-r from-sky-950 to-indigo-950 border border-sky-800/60 rounded-2xl p-5 flex items-center gap-5 mt-4">
+                <div class="text-4xl">🚀</div>
+                <div>
+                    <h4 class="font-bold text-white text-base">Your Graduation Quest Challenge:</h4>
+                    <p class="text-xs text-sky-200 mt-1">Navigate backwards to Slide 4 and execute this block inside the sandbox engine: <br><code class="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 font-mono inline-block mt-1">print("~" * 10 + " Complete " + "~" * 10)</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="progress-bar" id="progress"></div>
+<div class="nav-hint">Use <span class="key-box">&larr;</span><span class="key-box">&rarr;</span> or <span class="key-box">Space</span> to navigate</div>
+
+<script>
+    // Presenter Layer Global Engine State
+    let currentSlideIndex = 0;
+    const slideElements = document.querySelectorAll('.slide');
+    const progressBarElement = document.getElementById('progress');
+    const slideCounterElement = document.getElementById('slide-counter');
+    let totalBugsRemaining = 3;
+
+    function updatePresentationState() {
+        // Enforce boundary bounds checking rules
+        if (currentSlideIndex < 0) currentSlideIndex = 0;
+        if (currentSlideIndex >= slideElements.length) currentSlideIndex = slideElements.length - 1;
+
+        // Toggle active visual structures
+        slideElements.forEach((slide, index) => {
+            if (index === currentSlideIndex) {
+                slide.classList.add('active');
+            } else {
+                slide.classList.remove('active');
+            }
+        });
+
+        // Compute interface layout readouts
+        slideCounterElement.textContent = `${currentSlideIndex + 1} / ${slideElements.length}`;
+        const linearPercentage = (currentSlideIndex / (slideElements.length - 1)) * 100;
+        progressBarElement.style.width = `${linearPercentage}%`;
+    }
+
+    // Connect global navigation hotkeys
+    window.addEventListener('keydown', (event) => {
+        if (event.target.tagName === 'TEXTAREA' || event.target.tagName === 'INPUT') {
+            return; // Shield active editor workspace keys
+        }
+        if (event.key === 'ArrowRight' || event.key === ' ' || event.key === 'Spacebar') {
+            event.preventDefault();
+            currentSlideIndex++;
+            updatePresentationState();
+        } else if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            currentSlideIndex--;
+            updatePresentationState();
+        }
+    });
+
+    // Option verification system
+    function checkQuizAnswer(selectedButton, isCorrect, analysisString) {
+        // Clear matching row styles
+        const siblings = selectedButton.parentNode.querySelectorAll('.quiz-btn');
+        siblings.forEach(btn => {
+            btn.className = "quiz-btn p-4 bg-white rounded-xl text-left font-semibold text-slate-700 flex items-center justify-between";
+            btn.querySelector('i').className = "fa-solid fa-circle-notch text-slate-300";
+        });
+
+        if (isCorrect) {
+            selectedButton.className = "quiz-btn p-4 bg-emerald-50 border-emerald-500 rounded-xl text-left font-semibold text-emerald-800 flex items-center justify-between scale-[1.01] shadow-md shadow-emerald-100";
+            selectedButton.querySelector('i').className = "fa-solid fa-circle-check text-emerald-500 text-xl";
+        } else {
+            selectedButton.className = "quiz-btn p-4 bg-rose-50 border-rose-400 rounded-xl text-left font-semibold text-rose-800 flex items-center justify-between";
+            selectedButton.querySelector('i').className = "fa-solid fa-circle-xmark text-rose-500 text-xl";
+            selectedButton.classList.add('shake');
+            setTimeout(() => selectedButton.classList.remove('shake'), 400);
+        }
+
+        // Output breakdown commentary to user terminal layout
+        const tipBox = selectedButton.closest('.slide').querySelector('.bg-slate-100 p.text-xs');
+        if (tipBox) {
+            tipBox.innerHTML = `<strong>Result Context:</strong> ${analysisString}`;
+        }
+    }
+
+    // Bug line tracker state system
+    function toggleBugLine(lineDOM, isABug, feedbackMessage) {
+        const readoutBox = document.getElementById('bug-feedback');
+        
+        if (isABug) {
+            if (!lineDOM.classList.contains('found-bug')) {
+                lineDOM.classList.add('found-bug');
+                totalBugsRemaining--;
+                if (totalBugsRemaining < 0) totalBugsRemaining = 0;
+                document.getElementById('bug-counter').textContent = totalBugsRemaining === 0 ? "All cleared! 🎉" : `${totalBugsRemaining} Bugs remaining`;
+            }
+            readoutBox.innerHTML = `<span class="text-rose-600 font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Caught!</span> ${feedbackMessage}`;
+        } else {
+            lineDOM.classList.add('clean-line');
+            readoutBox.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check-double mr-1"></i> Clean!</span> ${feedbackMessage}`;
+        }
+    }
+
+    // RegEx Execution Engine Sandbox Emulator
+    function parsePrintStatements(sourceCode) {
+        const rawLines = sourceCode.split('\n');
+        const processingOutputs = [];
+
+        for (let line of rawLines) {
+            line = line.trim();
+            if (!line) continue;
+
+            // Enforce print parsing boundaries
+            if (line.startsWith('print(') && line.endsWith(')')) {
+                const structuralArgument = line.slice(6, -1).trim();
+
+                try {
+                    // Match length patterns safely
+                    if (structuralArgument.startsWith('len(') && structuralArgument.endsWith(')')) {
+                        const internalStringBlock = structuralArgument.slice(4, -1).trim();
+                        // Validate inner content string rules via evaluation safety mapping
+                        const evaluationResult = simulateStringMath(internalStringBlock);
+                        if (evaluationResult.type === 'error') {
+                            processingOutputs.push(evaluationResult);
+                        } else {
+                            processingOutputs.push({ type: 'success', value: String(evaluationResult.value.length) });
+                        }
+                        continue;
+                    }
+
+                    // Process general string calculations
+                    const generalEvaluation = simulateStringMath(structuralArgument);
+                    processingOutputs.push(generalEvaluation);
+
+                } catch (err) {
+                    processingOutputs.push({ type: 'error', value: `SyntaxError: invalid execution logic inside print statement boundary.` });
+                }
+
+            } else if (line.startsWith('print')) {
+                processingOutputs.push({ type: 'error', value: `SyntaxError: missing parentheses calling print function stack.` });
+            } else {
+                processingOutputs.push({ type: 'error', value: `SyntaxError: invalid operational logic command layout: "${line}"` });
+            }
+        }
+        return processingOutputs;
+    }
+
+    // Safe string operations mathematics simulation parser
+    function simulateStringMath(expression) {
+        // Split strings by safety additions token rules without malicious eval commands
+        // Matches literal blocks: "Text" * 3 or "A" + "B"
+        try {
+            // Simplified safe tokenizer loop parsing literals
+            // Token regex matching quotes and operations safely
+            const tokens = expression.match(/"[^"\\]*(?:\\.[^"\\]*)*"|\d+|\+|\*/g);
+            if (!tokens) {
+                // Check if simple integer math occurs inside string engine
+                if (/^\d+\s*[\+\*]\s*\d+$/.test(expression)) {
+                    return { type: 'success', value: String(eval(expression)) };
+                }
+                return { type: 'error', value: `NameError: undefined data identifiers or dirty math layout variables.` };
+            }
+
+            let processingSequence = [];
+            for (let i = 0; i < tokens.length; i++) {
+                let tok = tokens[i];
+                if (tok.startsWith('"') && tok.endsWith('"')) {
+                    processingSequence.push({ type: 'str', value: tok.slice(1, -1) });
+                } else if (/^\d+$/.test(tok)) {
+                    processingSequence.push({ type: 'int', value: parseInt(tok, 10) });
+                } else {
+                    processingSequence.push({ type: 'op', value: tok });
+                }
+            }
+
+            // High priority pass: process multiplication replication mappings
+            for (let i = 0; i < processingSequence.length; i++) {
+                if (processingSequence[i].type === 'op' && processingSequence[i].value === '*') {
+                    const leftSide = processingSequence[i - 1];
+                    const rightSide = processingSequence[i + 1];
+
+                    if (!leftSide || !rightSide) return { type: 'error', value: "SyntaxError: trailing multiplication tokens detected!" };
+
+                    if (leftSide.type === 'str' && rightSide.type === 'int') {
+                        let stringMultiplierOutput = leftSide.value.repeat(rightSide.value);
+                        processingSequence.splice(i - 1, 3, { type: 'str', value: stringMultiplierOutput });
+                        i--;
+                    } else if (leftSide.type === 'int' && rightSide.type === 'str') {
+                        let stringMultiplierOutput = rightSide.value.repeat(leftSide.value);
+                        processingSequence.splice(i - 1, 3, { type: 'str', value: stringMultiplierOutput });
+                        i--;
+                    } else {
+                        return { type: 'error', value: "TypeError: can't multiply sequence by non-int elements!" };
+                    }
+                }
+            }
+
+            // Low priority pass: evaluate additive string concat lines
+            let standardResult = processingSequence[0];
+            if (!standardResult) return { type: 'success', value: "" };
+
+            for (let i = 1; i < processingSequence.length; i += 2) {
+                let operationToken = processingSequence[i];
+                let nextValNode = processingSequence[i + 1];
+
+                if (!operationToken || !nextValNode) break;
+
+                if (operationToken.value === '+') {
+                    if (standardResult.type === 'str' && nextValNode.type === 'str') {
+                        standardResult.value += nextValNode.value;
+                    } else if (standardResult.type === 'int' && nextValNode.type === 'int') {
+                        standardResult.value += nextValNode.value;
+                    } else {
+                        return { type: 'error', value: "TypeError: can only concatenate str (not \"int\") to str entities!" };
+                    }
+                }
+            }
+
+            return { type: 'success', value: String(standardResult.value) };
+
+        } catch(e) {
+            return { type: 'error', value: "TypeError: operational clash during type engine resolution pass." };
+        }
+    }
+
+    async function runLiveCode() {
+        const interactiveWorkspaceCode = document.getElementById('live-editor').value;
+        const terminalScreen = document.getElementById('live-terminal');
+        terminalScreen.innerHTML = '';
+
+        if (!interactiveWorkspaceCode.trim()) {
+            terminalScreen.innerHTML = '<span class="text-slate-500"># Write some clean string execution code above and run scripts!</span>';
+            return;
+        }
+
+        const standardOutputs = parsePrintStatements(interactiveWorkspaceCode);
+
+        if (standardOutputs.length === 0) {
+            const emptyElementNode = document.createElement('div');
+            emptyElementNode.className = 'text-slate-500 italic';
+            emptyElementNode.textContent = '(no expression output)';
+            terminalScreen.appendChild(emptyElementNode);
+            return;
+        }
+
+        for (const lineOutputNode of standardOutputs) {
+            const textRowBox = document.createElement('div');
+            if (lineOutputNode.type === 'error') {
+                textRowBox.className = 'text-rose-400 font-bold';
+            } else {
+                textRowBox.className = 'text-sky-300';
+            }
+            terminalScreen.appendChild(textRowBox);
+
+            // Print typing effect mechanics
+            for (const characterToken of lineOutputNode.value) {
+                textRowBox.textContent += characterToken;
+                await new Promise(resolvePass => setTimeout(resolvePass, 12));
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

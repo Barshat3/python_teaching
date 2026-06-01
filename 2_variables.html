@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 2: Variables & Data Types</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;600;700&family=Lexend:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #0f172a;
+            --bg-slide: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            margin: 0;
+            overflow: hidden;
+            color: var(--secondary);
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 4rem;
+            background: var(--bg-slide);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease-in-out, visibility 0.4s;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        h1, h2, h3 { font-family: 'Lexend', sans-serif; }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1rem;
+        }
+
+        /* Box Animation Styles */
+        .box-container {
+            perspective: 1000px;
+        }
+        
+        .storage-box {
+            transform-style: preserve-3d;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .storage-box.open {
+            transform: rotateX(-10deg) translateY(-10px);
+        }
+
+        .box-lid {
+            transition: all 0.4s ease;
+            transform-origin: top;
+        }
+
+        .storage-box.open .box-lid {
+            transform: rotateX(-110deg);
+            background-color: #ef4444;
+        }
+
+        .box-content {
+            opacity: 0;
+            transform: translateY(20px) scale(0.8);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .storage-box.open .box-content {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Sorting Game Classes */
+        .type-bin {
+            transition: all 0.2s ease;
+        }
+        .type-bin.correct {
+            background-color: #d1fae5;
+            border-color: #10b981;
+            transform: scale(1.05);
+        }
+        .type-bin.wrong {
+            animation: shake 0.3s ease-in-out 2;
+            background-color: #fee2e2;
+            border-color: #ef4444;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .nav-hint {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 100;
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+        .key-box {
+            background: #334155;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+            z-index: 100;
+        }
+
+        /* Slide counter */
+        .slide-counter {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 100;
+            color: #475569;
+            font-size: 0.8rem;
+            font-family: 'Fira Code', monospace;
+            letter-spacing: 0.05em;
+        }
+
+        /* Improved slide transition */
+        .slide {
+            transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), visibility 0.35s, transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            transform: translateY(12px);
+        }
+        .slide.active {
+            transform: translateY(0);
+        }
+
+        /* Data type cards */
+        .dtype-card {
+            transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+        }
+        .dtype-card:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18);
+        }
+        .dtype-card.flipped .dtype-front { opacity: 0; transform: rotateY(90deg); }
+        .dtype-card .dtype-front { transition: opacity 0.2s, transform 0.2s; }
+
+        /* Highlight pulse for active line */
+        @keyframes lineGlow {
+            0%,100% { box-shadow: 0 0 0 0 transparent; }
+            50% { box-shadow: 0 0 0 4px rgba(244,63,94,0.35); }
+        }
+        .line-active {
+            animation: lineGlow 0.8s ease infinite;
+        }
+
+        /* bool toggle */
+        .bool-toggle {
+            width: 56px; height: 28px;
+            border-radius: 999px;
+            background: #ef4444;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: inline-flex; align-items: center;
+        }
+        .bool-toggle.on { background: #10b981; }
+        .bool-toggle .knob {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: white; position: absolute; left: 3px;
+            transition: left 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+        .bool-toggle.on .knob { left: 31px; }
+
+        /* Tooltip hover for type-bin */
+        .type-bin:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.12); }
+    </style>
+</head>
+<body>
+
+    <div id="presentation-container">
+        <div class="slide active bg-slate-900 flex flex-col items-center justify-center text-center" style="background-image: radial-gradient(circle at 20% 50%, rgba(59,130,246,0.08) 0%, transparent 60%), radial-gradient(circle at 80% 20%, rgba(99,102,241,0.08) 0%, transparent 50%);">
+            <div class="space-y-6">
+                <div class="inline-flex items-center gap-2 px-5 py-2 bg-blue-600/20 border border-blue-500/40 rounded-full text-blue-300 font-bold text-sm tracking-widest uppercase backdrop-blur">
+                    <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                    Level 2: Memory Magic
+                </div>
+                <h1 class="text-7xl font-extrabold text-white tracking-tight leading-tight">Variables &<br><span class="text-blue-400">Data Types</span></h1>
+                <p class="text-xl text-slate-400 max-w-2xl mx-auto">Labeling and packing your computer's storage boxes!</p>
+                <div class="flex justify-center gap-8 pt-4">
+                    <div class="flex flex-col items-center gap-1">
+                        <span class="text-2xl">📦</span>
+                        <span class="text-xs text-slate-500">Variables</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <span class="text-2xl">🔢</span>
+                        <span class="text-xs text-slate-500">Integers</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <span class="text-2xl">💧</span>
+                        <span class="text-xs text-slate-500">Floats</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <span class="text-2xl">💬</span>
+                        <span class="text-xs text-slate-500">Strings</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-1">
+                        <span class="text-2xl">✅</span>
+                        <span class="text-xs text-slate-500">Booleans</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+                <!-- NEW: Data Types Deep Dive Slide -->
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-3 border-l-8 border-indigo-500 pl-6">🧬 Python's 4 Core Data Types</h2>
+            <p class="text-base text-slate-500 mb-5">Each type tells Python <em>how</em> to store and use the data. Hover a card to explore, then try the live demo below!</p>
+
+            <div class="grid grid-cols-4 gap-4 mb-5">
+                <!-- int -->
+                <div class="dtype-card bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 flex flex-col gap-2 cursor-default">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-2xl">🔢</span>
+                        <span class="font-bold text-amber-700 text-lg font-mono">int</span>
+                        <span class="ml-auto text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full font-semibold">Integer</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed">Whole numbers — positive, negative, or zero. <strong>No decimal point.</strong></p>
+                    <div class="code-block text-sm mt-auto !py-2 !px-3">
+                        <span class="text-sky-400">year</span> = <span class="text-amber-400">2025</span><br>
+                        <span class="text-sky-400">temp</span> = <span class="text-amber-400">-7</span>
+                    </div>
+                    <div class="text-xs text-amber-700 bg-amber-100 rounded-lg px-3 py-1.5">
+                        <i class="fa-solid fa-bolt mr-1"></i>Fast math · Can grow infinitely large in Python!
+                    </div>
+                </div>
+
+                <!-- float -->
+                <div class="dtype-card bg-sky-50 border-2 border-sky-200 rounded-2xl p-5 flex flex-col gap-2 cursor-default">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-2xl">💧</span>
+                        <span class="font-bold text-sky-700 text-lg font-mono">float</span>
+                        <span class="ml-auto text-xs bg-sky-200 text-sky-800 px-2 py-0.5 rounded-full font-semibold">Decimal</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed">Numbers with a <strong>decimal point.</strong> Used for measurements, prices, percentages.</p>
+                    <div class="code-block text-sm mt-auto !py-2 !px-3">
+                        <span class="text-sky-400">pi</span> = <span class="text-amber-400">3.14159</span><br>
+                        <span class="text-sky-400">tax</span> = <span class="text-amber-400">0.13</span>
+                    </div>
+                    <div class="text-xs text-sky-700 bg-sky-100 rounded-lg px-3 py-1.5">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i><code class="font-mono">0.1 + 0.2 ≠ 0.3</code> — floating point quirk!
+                    </div>
+                </div>
+
+                <!-- str -->
+                <div class="dtype-card bg-purple-50 border-2 border-purple-200 rounded-2xl p-5 flex flex-col gap-2 cursor-default">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-2xl">💬</span>
+                        <span class="font-bold text-purple-700 text-lg font-mono">str</span>
+                        <span class="ml-auto text-xs bg-purple-200 text-purple-800 px-2 py-0.5 rounded-full font-semibold">String</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed">Any text, wrapped in <strong>quotes.</strong> Letters, words, emojis — it's all a string!</p>
+                    <div class="code-block text-sm mt-auto !py-2 !px-3">
+                        <span class="text-sky-400">name</span> = <span class="text-emerald-400">"Alice"</span><br>
+                        <span class="text-sky-400">msg</span> = <span class="text-emerald-400">'Hi! 👋'</span>
+                    </div>
+                    <div class="text-xs text-purple-700 bg-purple-100 rounded-lg px-3 py-1.5">
+                        <i class="fa-solid fa-plus mr-1"></i>Strings can be <em>concatenated</em>: <code class="font-mono">"Hi" + " Alice"</code>
+                    </div>
+                </div>
+
+                <!-- bool -->
+                <div class="dtype-card bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 flex flex-col gap-2 cursor-default">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-2xl">✅</span>
+                        <span class="font-bold text-emerald-700 text-lg font-mono">bool</span>
+                        <span class="ml-auto text-xs bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full font-semibold">Boolean</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed">Only <strong>two</strong> possible values: <code class="font-mono text-emerald-700">True</code> or <code class="font-mono text-red-600">False</code>. The on/off switch of programming!</p>
+                    <div class="code-block text-sm mt-auto !py-2 !px-3">
+                        <span class="text-sky-400">logged_in</span> = <span class="text-emerald-400">True</span><br>
+                        <span class="text-sky-400">is_admin</span> = <span class="text-rose-400">False</span>
+                    </div>
+                    <div class="text-xs text-emerald-700 bg-emerald-100 rounded-lg px-3 py-1.5">
+                        <i class="fa-solid fa-code-branch mr-1"></i>Powers all <code class="font-mono">if</code> statements and logic!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive: type() checker -->
+            <div class="bg-slate-800 rounded-2xl p-5 flex items-center gap-6">
+                <div class="flex-1">
+                    <p class="text-slate-300 text-sm font-semibold mb-2"><i class="fa-solid fa-flask text-indigo-400 mr-1"></i> Live <code class="font-mono text-indigo-300">type()</code> Checker — click a value to detect its type:</p>
+                    <div class="flex flex-wrap gap-2" id="type-chips">
+                        <button onclick="checkType(42, 'int', this)" class="font-mono px-3 py-1.5 bg-slate-700 hover:bg-amber-600 text-white rounded-lg text-sm transition">42</button>
+                        <button onclick="checkType(3.14, 'float', this)" class="font-mono px-3 py-1.5 bg-slate-700 hover:bg-sky-600 text-white rounded-lg text-sm transition">3.14</button>
+                        <button onclick="checkType('\"hello\"', 'str', this)" class="font-mono px-3 py-1.5 bg-slate-700 hover:bg-purple-600 text-white rounded-lg text-sm transition">"hello"</button>
+                        <button onclick="checkType('True', 'bool', this)" class="font-mono px-3 py-1.5 bg-slate-700 hover:bg-emerald-600 text-white rounded-lg text-sm transition">True</button>
+                        <button onclick="checkType(-99, 'int', this)" class="font-mono px-3 py-1.5 bg-slate-700 hover:bg-amber-600 text-white rounded-lg text-sm transition">-99</button>
+                        <button onclick="checkType(0.001, 'float', this)" class="font-mono px-3 py-1.5 bg-slate-700 hover:bg-sky-600 text-white rounded-lg text-sm transition">0.001</button>
+                        <button onclick="checkType('\"Python🐍\"', 'str', this)" class="font-mono px-3 py-1.5 bg-slate-700 hover:bg-purple-600 text-white rounded-lg text-sm transition">"Python🐍"</button>
+                        <button onclick="checkType('False', 'bool', this)" class="font-mono px-3 py-1.5 bg-slate-700 hover:bg-emerald-600 text-white rounded-lg text-sm transition">False</button>
+                    </div>
+                </div>
+                <div id="type-result" class="min-w-[180px] text-center bg-slate-900 rounded-xl p-4 border-2 border-slate-700 transition-all">
+                    <p class="text-slate-500 text-xs mb-1">Output</p>
+                    <p id="type-result-text" class="font-mono text-slate-500 text-base">click a value →</p>
+                </div>
+            </div>
+        </div>
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-5 border-l-8 border-blue-500 pl-6">What is a Variable? 🤔</h2>
+            <p class="text-xl leading-relaxed text-slate-600 mb-6">In programming, a <strong>variable</strong> is a named memory storage box. You can put things inside it, change them later, or read what's stored — all by using its label.</p>
+            
+            <div class="grid grid-cols-2 gap-8 items-center flex-grow">
+                <div class="space-y-4">
+                    <div class="code-block text-xl leading-relaxed">
+                        <div><span class="text-sky-400">age</span> <span class="text-rose-400">=</span> <span class="text-amber-400">12</span></div>
+                        <div class="mt-2"><span class="text-sky-400">name</span> <span class="text-rose-400">=</span> <span class="text-emerald-400">"Alice"</span></div>
+                    </div>
+                    <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                        <p class="text-slate-700 font-semibold"><i class="fa-solid fa-tags text-blue-500 mr-2"></i>The Break Down:</p>
+                        <ul class="space-y-2 text-slate-600 text-base">
+                            <li class="flex items-start gap-2"><span class="mt-1 w-2 h-2 rounded-full bg-sky-400 flex-shrink-0"></span><span><strong class="text-slate-900 font-mono">age</strong> — the <strong>Label</strong> (Variable Name)</span></li>
+                            <li class="flex items-start gap-2"><span class="mt-1 w-2 h-2 rounded-full bg-rose-400 flex-shrink-0"></span><span><strong class="text-slate-900 font-mono text-lg">=</strong> — the <strong>Assignment Operator</strong></span></li>
+                            <li class="flex items-start gap-2"><span class="mt-1 w-2 h-2 rounded-full bg-amber-400 flex-shrink-0"></span><span><strong class="text-slate-900 font-mono">12</strong> — the <strong>Value</strong> stored inside</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-700">
+                        <i class="fa-solid fa-lightbulb text-blue-500 mr-2"></i>
+                        <strong>Naming Rules:</strong> use <code class="font-mono bg-blue-100 px-1 rounded">snake_case</code>, no spaces, no starting with a number!
+                    </div>
+                </div>
+                <div class="flex flex-col items-center justify-center bg-blue-50 border border-blue-100 rounded-2xl p-8 h-full gap-4">
+                    <i class="fa-solid fa-box-archive text-8xl text-blue-500 animate-bounce" style="animation-duration:2s"></i>
+                    <p class="text-center font-medium text-slate-700 text-lg">Instead of remembering messy computer addresses like <code class="font-mono text-blue-600 bg-blue-100 px-1 rounded">0x7ffd4a</code>, we just talk to boxes by their labels!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-2 border-l-8 border-emerald-500 pl-6">📦 The Storage Box Lab</h2>
+            <p class="text-base text-slate-600 mb-6">Click on a variable box to open its lid and see what value and data type are hidden inside!</p>
+            
+            <div class="grid grid-cols-3 gap-8 items-end justify-center flex-grow mb-8">
+                <div class="box-container flex flex-col items-center">
+                    <div id="box-age" onclick="toggleBox('box-age')" class="storage-box bg-amber-600 w-52 h-44 rounded-b-xl relative shadow-xl flex flex-col items-center justify-end pb-6 border-b-4 border-amber-700">
+                        <div class="box-lid absolute -top-4 left-0 w-full h-6 bg-amber-500 rounded-t-md border-b-2 border-amber-700 shadow-md"></div>
+                        <span class="font-mono font-bold text-white text-2xl tracking-wide bg-amber-800/50 px-3 py-1 rounded">age</span>
+                        
+                        <div class="box-content absolute -top-24 bg-white border-2 border-amber-500 p-3 rounded-xl text-center shadow-lg w-44">
+                            <div class="text-2xl font-extrabold text-amber-600">12</div>
+                            <div class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Type: Integer (int)</div>
+                            <div class="text-[10px] text-slate-500 mt-1 leading-tight">Whole numbers with no decimals!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-container flex flex-col items-center">
+                    <div id="box-pi" onclick="toggleBox('box-pi')" class="storage-box bg-sky-600 w-52 h-44 rounded-b-xl relative shadow-xl flex flex-col items-center justify-end pb-6 border-b-4 border-sky-700">
+                        <div class="box-lid absolute -top-4 left-0 w-full h-6 bg-sky-500 rounded-t-md border-b-2 border-sky-700 shadow-md"></div>
+                        <span class="font-mono font-bold text-white text-2xl tracking-wide bg-sky-800/50 px-3 py-1 rounded">score</span>
+                        
+                        <div class="box-content absolute -top-24 bg-white border-2 border-sky-500 p-3 rounded-xl text-center shadow-lg w-44">
+                            <div class="text-2xl font-extrabold text-sky-600">98.5</div>
+                            <div class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Type: Float (float)</div>
+                            <div class="text-[10px] text-slate-500 mt-1 leading-tight">Numbers containing decimal points!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-container flex flex-col items-center">
+                    <div id="box-hero" onclick="toggleBox('box-hero')" class="storage-box bg-purple-600 w-52 h-44 rounded-b-xl relative shadow-xl flex flex-col items-center justify-end pb-6 border-b-4 border-purple-700">
+                        <div class="box-lid absolute -top-4 left-0 w-full h-6 bg-purple-500 rounded-t-md border-b-2 border-purple-700 shadow-md"></div>
+                        <span class="font-mono font-bold text-white text-xl tracking-wide bg-purple-800/50 px-2 py-1 rounded">hero_name</span>
+                        
+                        <div class="box-content absolute -top-24 bg-white border-2 border-purple-500 p-3 rounded-xl text-center shadow-lg w-44">
+                            <div class="text-xl font-extrabold text-purple-600">"Zelda 👑"</div>
+                            <div class="text-xs font-bold text-slate-400 tracking-wider uppercase mt-1">Type: String (str)</div>
+                            <div class="text-[10px] text-slate-500 mt-1 leading-tight">Text locked inside quotes marks!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-3 border-l-8 border-purple-500 pl-6">🎮 Challenge: Type Sorting!</h2>
+            <p class="text-base text-slate-600 mb-4">Click a target element box below, then click the correct matching data type classification bin to organize it!</p>
+            
+            <div class="flex flex-col flex-grow justify-between">
+                <div class="flex justify-center my-2">
+                    <div id="current-card" class="bg-slate-800 text-yellow-300 font-mono font-bold text-3xl px-8 py-4 rounded-xl border-2 border-slate-700 shadow-md transition-all">
+                        "Pikachu ⚡"
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-6 items-stretch mb-4">
+                    <div onclick="submitSort('int')" id="bin-int" class="type-bin border-4 border-dashed border-amber-300 bg-amber-50 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-amber-100">
+                        <i class="fa-solid fa-arrow-down-1-9 text-4xl text-amber-600 mb-2"></i>
+                        <h3 class="text-xl font-bold text-slate-800">Integer (int)</h3>
+                        <p class="text-xs text-slate-500 mt-1">Whole Numbers</p>
+                    </div>
+
+                    <div onclick="submitSort('float')" id="bin-float" class="type-bin border-4 border-dashed border-sky-300 bg-sky-50 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-sky-100">
+                        <i class="fa-solid fa-calculator text-4xl text-sky-600 mb-2"></i>
+                        <h3 class="text-xl font-bold text-slate-800">Float (float)</h3>
+                        <p class="text-xs text-slate-500 mt-1">Decimal Numbers</p>
+                    </div>
+
+                    <div onclick="submitSort('str')" id="bin-str" class="type-bin border-4 border-dashed border-purple-300 bg-purple-50 rounded-2xl p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-100">
+                        <i class="fa-solid fa-quote-left text-4xl text-purple-600 mb-2"></i>
+                        <h3 class="text-xl font-bold text-slate-800">String (str)</h3>
+                        <p class="text-xs text-slate-500 mt-1">Text inside Quotes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-4 border-l-8 border-rose-500 pl-6">Variables Can Vary! 🔄</h2>
+            <p class="text-lg text-slate-600 mb-6">Variables aren't locked forever. You can throw out an old value and replace it with a fresh one instantly.</p>
+            
+            <div class="grid grid-cols-2 gap-8 items-stretch flex-grow">
+                <div class="bg-slate-800 text-white rounded-2xl p-6 flex flex-col justify-between">
+                    <div class="space-y-4 font-mono text-xl">
+                        <div id="line1" class="p-2 rounded border border-transparent">score = <span class="text-amber-400">0</span></div>
+                        <div id="line2" class="p-2 rounded border border-transparent">score = <span class="text-amber-400">10</span></div>
+                        <div id="line3" class="p-2 rounded border border-transparent">score = score + <span class="text-amber-400">5</span></div>
+                    </div>
+                    <button onclick="animateScoreProgression()" class="bg-rose-500 hover:bg-rose-600 font-bold py-3 text-lg rounded-xl transition shadow-md">
+                        <i class="fa-solid fa-play mr-2"></i>Run Step-by-Step
+                    </button>
+                </div>
+
+                <div class="border-2 border-slate-200 rounded-2xl bg-slate-50 flex flex-col items-center justify-center p-8 relative">
+                    <div class="text-center mb-4">
+                        <p class="text-sm uppercase font-bold text-slate-400 tracking-wider">Live Variable Value</p>
+                    </div>
+                    <div class="w-48 h-40 bg-rose-600 rounded-b-2xl border-b-8 border-rose-800 flex flex-col items-center justify-center shadow-2xl relative">
+                        <div class="absolute -top-3 left-0 w-full h-4 bg-rose-500 rounded-t-sm"></div>
+                        <span class="absolute top-2 text-xs font-mono bg-rose-800 px-2 py-0.5 rounded text-rose-200">Label</span>
+                        <div class="font-mono text-3xl font-extrabold text-white mt-2">score</div>
+                        
+                        <div id="live-box-value" class="absolute -top-16 bg-white border-4 border-rose-600 rounded-2xl font-bold text-4xl text-rose-600 px-6 py-2 shadow-xl transition-all scale-100">
+                            ?
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="slide bg-slate-900 text-white flex flex-col items-center justify-center text-center" style="background-image: radial-gradient(circle at 50% 60%, rgba(59,130,246,0.1) 0%, transparent 60%);">
+            <i class="fa-solid fa-circle-check text-8xl text-blue-400 mb-6"></i>
+            <h2 class="text-5xl font-black mb-4">Storage Master Unlock!</h2>
+            <p class="text-xl text-slate-400 max-w-xl">You now know how to save data inside variables using integers, floats, strings, and booleans!</p>
+            <div class="mt-8 flex gap-4 justify-center text-3xl">
+                <span title="int">🔢</span><span title="float">💧</span><span title="str">💬</span><span title="bool">✅</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress-bar" id="progress"></div>
+    <div class="slide-counter" id="slide-counter">1 / 7</div>
+    <div class="nav-hint">
+        <span>Use <span class="key-box">&larr;</span> <span class="key-box">&rarr;</span> or <span class="key-box">Space</span> to navigate</span>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress');
+        const slideCounter = document.getElementById('slide-counter');
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            const progressWidth = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = `${progressWidth}%`;
+            slideCounter.textContent = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                if (currentSlide < slides.length - 1) { currentSlide++; updateSlide(); }
+            } else if (e.key === 'ArrowLeft') {
+                if (currentSlide > 0) { currentSlide--; updateSlide(); }
+            }
+        });
+
+        // Slide 3 Engine: Toggle Storage Lids
+        function toggleBox(id) {
+            const targetBox = document.getElementById(id);
+            targetBox.classList.toggle('open');
+        }
+
+        // Slide 4 Engine: Challenge Game Sorting Pipeline
+        const puzzleDatabase = [
+            { value: '"Pikachu ⚡"', type: 'str' },
+            { value: '45', type: 'int' },
+            { value: '3.14', type: 'float' },
+            { value: '"Game Over 👾"', type: 'str' },
+            { value: '999', type: 'int' },
+            { value: '0.75', type: 'float' }
+        ];
+        let puzzleIndex = 0;
+
+        function submitSort(chosenType) {
+            const currentItem = puzzleDatabase[puzzleIndex];
+            const targetBin = document.getElementById(`bin-${chosenType}`);
+            
+            if(currentItem.type === chosenType) {
+                targetBin.classList.add('correct');
+                setTimeout(() => {
+                    targetBin.classList.remove('correct');
+                    puzzleIndex++;
+                    if(puzzleIndex < puzzleDatabase.length) {
+                        document.getElementById('current-card').innerText = puzzleDatabase[puzzleIndex].value;
+                    } else {
+                        document.getElementById('current-card').innerHTML = "🎉 All Sorted Perfect!";
+                        document.getElementById('current-card').className = "bg-emerald-600 text-white font-bold text-2xl px-8 py-4 rounded-xl shadow-md";
+                    }
+                }, 600);
+            } else {
+                targetBin.classList.add('wrong');
+                setTimeout(() => { targetBin.classList.remove('wrong'); }, 500);
+            }
+        }
+
+        async function animateScoreProgression() {
+            const l1 = document.getElementById('line1');
+            const l2 = document.getElementById('line2');
+            const l3 = document.getElementById('line3');
+            const liveDisplay = document.getElementById('live-box-value');
+
+            // Reset
+            l1.className = l2.className = l3.className = "p-2 rounded border border-transparent";
+            liveDisplay.innerText = "?";
+            liveDisplay.style.transform = "scale(1)";
+
+            // Step 1
+            await new Promise(r => setTimeout(r, 400));
+            l1.className = "p-2 rounded border line-active bg-rose-950 border-rose-500";
+            liveDisplay.innerText = "0";
+            liveDisplay.style.transform = "scale(1.2)";
+            
+            // Step 2
+            await new Promise(r => setTimeout(r, 1200));
+            l1.className = "p-2 rounded border border-transparent";
+            l2.className = "p-2 rounded border line-active bg-rose-950 border-rose-500";
+            liveDisplay.innerText = "10";
+            liveDisplay.style.transform = "scale(1.2)";
+            
+            // Step 3
+            await new Promise(r => setTimeout(r, 1200));
+            l2.className = "p-2 rounded border border-transparent";
+            l3.className = "p-2 rounded border line-active bg-rose-950 border-rose-500";
+            liveDisplay.innerText = "15";
+            liveDisplay.style.transform = "scale(1.2)";
+            
+            await new Promise(r => setTimeout(r, 1000));
+            l3.className = "p-2 rounded border border-transparent";
+            liveDisplay.style.transform = "scale(1)";
+        }
+
+        // Data Types Slide: type() checker
+        const typeColors = {
+            int:   { bg: 'border-amber-400',  text: 'text-amber-400',  label: "class 'int'" },
+            float: { bg: 'border-sky-400',    text: 'text-sky-400',    label: "class 'float'" },
+            str:   { bg: 'border-purple-400', text: 'text-purple-400', label: "class 'str'" },
+            bool:  { bg: 'border-emerald-400',text: 'text-emerald-400',label: "class 'bool'" },
+        };
+        function checkType(val, type, btn) {
+            const resultBox = document.getElementById('type-result');
+            const resultText = document.getElementById('type-result-text');
+            const c = typeColors[type];
+            resultBox.className = `min-w-[180px] text-center bg-slate-900 rounded-xl p-4 border-2 ${c.bg} transition-all scale-105`;
+            resultText.className = `font-mono text-base ${c.text} font-bold`;
+            resultText.textContent = `<${c.label}>`;
+            setTimeout(() => { resultBox.style.transform = ''; }, 300);
+            // pulse the clicked button
+            btn.classList.add('ring-2','ring-white');
+            setTimeout(() => btn.classList.remove('ring-2','ring-white'), 600);
+        }
+
+        // Initialize view states mapping hooks
+        updateSlide();
+    </script>
+</body>
+</html>

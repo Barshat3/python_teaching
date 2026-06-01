@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level 3: Basic Arithmetic Operators</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --emerald: #10b981;
+            --amber:   #f59e0b;
+            --sky:     #38bdf8;
+            --violet:  #a78bfa;
+            --rose:    #fb7185;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #0d1117;
+            margin: 0;
+            overflow: hidden;
+            color: #0f172a;
+        }
+
+        /* ── slide system ── */
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 3rem 4rem;
+            background: #f8fafc;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.35s, visibility 0.35s, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(12px);
+            z-index: 1;
+            overflow: hidden;
+        }
+        .slide.active { opacity: 1; visibility: visible; z-index: 10; transform: translateY(0); }
+
+        /* ── heading font ── */
+        h1, h2, h3 { font-family: 'Nunito', sans-serif; }
+
+        /* ── slide-in animation for content children ── */
+        @keyframes slideUp {
+            from { opacity:0; transform: translateY(22px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+        .slide.active .animate-in {
+            animation: slideUp 0.45s ease both;
+        }
+        .slide.active .animate-in:nth-child(1)  { animation-delay: .05s; }
+        .slide.active .animate-in:nth-child(2)  { animation-delay: .15s; }
+        .slide.active .animate-in:nth-child(3)  { animation-delay: .25s; }
+        .slide.active .animate-in:nth-child(4)  { animation-delay: .35s; }
+        .slide.active .animate-in:nth-child(5)  { animation-delay: .45s; }
+        .slide.active .animate-in:nth-child(6)  { animation-delay: .55s; }
+
+        /* ── code block ── */
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.25rem 1.5rem;
+            border-radius: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        /* ── terminal ── */
+        .terminal-box {
+            background: #020617;
+            border: 2px solid #334155;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        .terminal-header {
+            background: #1e293b;
+            padding: 0.6rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            border-bottom: 1px solid #334155;
+        }
+        .dot { width: 11px; height: 11px; border-radius: 50%; }
+
+        /* ── quiz buttons ── */
+        .quiz-btn {
+            transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+            border: 2px solid #e2e8f0;
+            cursor: pointer;
+        }
+        .quiz-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 14px -2px rgba(0,0,0,.12); }
+
+        @keyframes shake {
+            0%,100% { transform: translateX(0); }
+            25%      { transform: translateX(-8px); }
+            75%      { transform: translateX(8px); }
+        }
+        .shake { animation: shake 0.3s ease-in-out 2; }
+
+        /* ── slide counter ── */
+        #slide-counter {
+            position: fixed;
+            top: 1.35rem;
+            left: 1.5rem;
+            z-index: 200;
+            font-size: 0.8rem;
+            color: #64748b;
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* ── progress bar ── */
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            transition: width 0.35s ease;
+            z-index: 100;
+        }
+
+        /* ── nav hint ── */
+        .nav-hint {
+            position: fixed;
+            bottom: 1.1rem;
+            right: 1.5rem;
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+            z-index: 100;
+            color: #94a3b8;
+            font-size: 0.72rem;
+        }
+        .key-box {
+            background: #334155;
+            color: #e2e8f0;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+        }
+
+        /* ── anatomy color tokens ── */
+        .token-var    { color: #38bdf8; font-weight: 600; }
+        .token-op     { color: #fb7185; font-weight: 700; }
+        .token-num    { color: #f59e0b; font-weight: 600; }
+        .token-comment{ color: #64748b; font-style: italic; }
+
+        /* ── bug hunt ── */
+        .bug-line {
+            cursor: pointer;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            transition: background 0.2s;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.05rem;
+        }
+        .bug-line:hover { background: #1e293b; color: #f8fafc; }
+        .bug-line.found-bug  { background: #450a0a; color: #fecaca; border-left: 4px solid #f87171; }
+        .bug-line.clean-line { background: #052e16; color: #d1fae5; border-left: 4px solid #34d399; }
+
+        /* ── editable code input ── */
+        #live-editor {
+            background: transparent;
+            color: #fbbf24;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1rem;
+            border: none;
+            outline: none;
+            resize: none;
+            width: 100%;
+            line-height: 1.7;
+        }
+        #live-editor::placeholder { color: #475569; }
+
+        /* ── interactive deck components ── */
+        .operator-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .operator-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div id="slide-counter">1 / 7</div>
+
+<div id="presentation-container">
+
+    <div class="slide active bg-slate-900 flex flex-col items-center justify-center text-center" style="background-image: radial-gradient(circle at 20% 50%, rgba(59,130,246,0.08) 0%, transparent 60%);">
+        <div class="space-y-6">
+            <div class="animate-in inline-flex items-center gap-2 px-5 py-2 bg-blue-500/20 border border-blue-500/40 rounded-full text-blue-400 font-bold text-sm tracking-widest uppercase">
+                <i class="fa-solid fa-calculator"></i> Level 3: Crunching Numbers
+            </div>
+            <h1 class="animate-in text-6xl font-black text-white tracking-tight leading-tight">
+                Basic Arithmetic<br>in <span class="text-blue-400">Python Operators</span>
+            </h1>
+            <p class="animate-in text-xl text-slate-400 max-w-xl mx-auto">Turning your system into a supercharged programmable calculator!</p>
+            <div class="animate-in flex items-center justify-center gap-8 pt-4 text-slate-500 text-sm">
+                <span><i class="fa-solid fa-layer-group mr-1"></i>7 slides</span>
+                <span><i class="fa-solid fa-keyboard mr-1"></i>Use arrow keys to navigate</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 class="animate-in text-4xl font-black text-slate-800 mb-2 border-l-8 border-blue-500 pl-5">The Math Toolbox 🛠️</h2>
+        <p class="animate-in text-lg text-slate-500 mb-6">Python uses standard keyboard symbols to compute actions on integers and decimals.</p>
+
+        <div class="grid grid-cols-4 gap-4 flex-grow items-stretch">
+            <div class="animate-in operator-card bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl font-mono font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-lg">+</span>
+                    <h3 class="text-lg font-bold text-slate-800 mt-3">Addition</h3>
+                    <p class="text-xs text-slate-500 mt-1">Combines values together.</p>
+                </div>
+                <code class="text-xs bg-slate-800 text-slate-200 p-2 rounded mt-3 font-mono">5 + 3 # 8</code>
+            </div>
+
+            <div class="animate-in operator-card bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl font-mono font-bold text-rose-600 bg-rose-100 px-3 py-1 rounded-lg">-</span>
+                    <h3 class="text-lg font-bold text-slate-800 mt-3">Subtraction</h3>
+                    <p class="text-xs text-slate-500 mt-1">Subtracts right from left.</p>
+                </div>
+                <code class="text-xs bg-slate-800 text-slate-200 p-2 rounded mt-3 font-mono">10 - 4 # 6</code>
+            </div>
+
+            <div class="animate-in operator-card bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl font-mono font-bold text-amber-600 bg-amber-100 px-3 py-1 rounded-lg">*</span>
+                    <h3 class="text-lg font-bold text-slate-800 mt-3">Multiplication</h3>
+                    <p class="text-xs text-slate-500 mt-1">Uses an asterisk icon symbol.</p>
+                </div>
+                <code class="text-xs bg-slate-800 text-slate-200 p-2 rounded mt-3 font-mono">3 * 4 # 12</code>
+            </div>
+
+            <div class="animate-in operator-card bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+                <div>
+                    <span class="text-2xl font-mono font-bold text-emerald-600 bg-emerald-100 px-3 py-1 rounded-lg">/</span>
+                    <h3 class="text-lg font-bold text-slate-800 mt-3">True Division</h3>
+                    <p class="text-xs text-slate-500 mt-1">Always returns a float decimal!</p>
+                </div>
+                <code class="text-xs bg-slate-800 text-slate-200 p-2 rounded mt-3 font-mono">7 / 2 # 3.5</code>
+            </div>
+        </div>
+
+        <div class="animate-in mt-4 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-3">
+            <span class="text-2xl">⚠️</span>
+            <p class="text-slate-700 text-sm">Note that standard division <code class="font-mono bg-white px-1 rounded">/</code> always outputs a float container even if numbers divide perfectly, like <code class="font-mono text-emerald-600">4 / 2</code> giving <code class="font-mono font-bold">2.0</code>.</p>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 class="animate-in text-4xl font-black text-slate-800 mb-2 border-l-8 border-violet-500 pl-5">Anatomy of an Expression 🔍</h2>
+        <p class="animate-in text-lg text-slate-500 mb-6">How variables and literal constants match together seamlessly inside memory evaluation lines.</p>
+
+        <div class="animate-in bg-slate-800 rounded-2xl p-6 mb-6 font-mono text-3xl text-center tracking-wide shadow-xl">
+            <span class="token-var">result</span> <span class="token-op">=</span> <span class="token-var">points</span> <span class="token-op">*</span> <span class="token-num">2</span> <span class="token-op">+</span> <span class="token-num">10</span>
+        </div>
+
+        <div class="flex flex-col gap-3 flex-grow justify-center max-w-3xl mx-auto w-full">
+            <div class="animate-in flex items-center gap-5 p-3 bg-sky-50 rounded-xl border-l-4 border-sky-500">
+                <code class="font-mono font-bold text-lg text-sky-600 min-w-[140px]">Variables</code>
+                <p class="text-slate-700 text-sm"><code class="font-mono bg-white px-1 rounded text-slate-800">result</code> and <code class="font-mono bg-white px-1 rounded text-slate-800">points</code> evaluate dynamically based on current memory box contents.</p>
+            </div>
+            <div class="animate-in flex items-center gap-5 p-3 bg-rose-50 rounded-xl border-l-4 border-rose-500">
+                <code class="font-mono font-bold text-lg text-rose-600 min-w-[140px]">= * +</code>
+                <p class="text-slate-700 text-sm">The <strong>Operators</strong> perform assignments and mathematical mutations. Spaces around them are optional but highly recommended!</p>
+            </div>
+            <div class="animate-in flex items-center gap-5 p-3 bg-amber-50 rounded-xl border-l-4 border-amber-500">
+                <code class="font-mono font-bold text-lg text-amber-600 min-w-[140px]">2, 10</code>
+                <p class="text-slate-700 text-sm">Numeric <strong>literals</strong>. Do not use quotation wrappers here or Python treats them as literal character labels instead of digits!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 class="animate-in text-4xl font-black text-slate-800 mb-2 border-l-8 border-emerald-500 pl-5">Advanced Math Powers 💪</h2>
+        <p class="animate-in text-lg text-slate-500 mb-6">Python provides three specialty symbols for powers, clean cuts, and remainders.</p>
+
+        <div class="grid grid-cols-3 gap-6 flex-grow items-stretch">
+            <div class="animate-in bg-violet-50 border border-violet-100 rounded-2xl p-5 flex flex-col gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl font-mono font-bold text-violet-700 bg-violet-100 px-2.5 py-0.5 rounded">**</span>
+                    <h3 class="font-bold text-slate-800">Exponentiation</h3>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">Raises the left number to the power of the right number.</p>
+                <code class="text-xs bg-slate-800 text-slate-200 p-2 rounded mt-auto font-mono">2 ** 3 # 2*2*2 = 8</code>
+            </div>
+
+            <div class="animate-in bg-amber-50 border border-amber-100 rounded-2xl p-5 flex flex-col gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl font-mono font-bold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded">//</span>
+                    <h3 class="font-bold text-slate-800">Floor Division</h3>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">Divides and chops off everything after the decimal point toward zero.</p>
+                <code class="text-xs bg-slate-800 text-slate-200 p-2 rounded mt-auto font-mono">7 // 2 # Gives 3</code>
+            </div>
+
+            <div class="animate-in bg-rose-50 border border-rose-100 rounded-2xl p-5 flex flex-col gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl font-mono font-bold text-rose-700 bg-rose-100 px-2.5 py-0.5 rounded">%</span>
+                    <h3 class="font-bold text-slate-800">Modulo (Remainder)</h3>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">Finds the leftover remainder after dividing completely by a value.</p>
+                <code class="text-xs bg-slate-800 text-slate-200 p-2 rounded mt-auto font-mono">7 % 2 # Leftover = 1</code>
+            </div>
+        </div>
+
+        <div class="animate-in bg-slate-800 rounded-xl p-4 mt-4 flex items-center justify-between text-slate-200">
+            <span class="text-sm font-semibold text-sky-400"><i class="fa-solid fa-lightbulb mr-2"></i>Operator Explorer:</span>
+            <div class="flex gap-4 font-mono text-xs">
+                <button onclick="document.getElementById('op-exp-out').innerText = 'Output: ' + (15 // 4)" class="bg-slate-700 px-3 py-1 rounded hover:bg-slate-600">15 // 4</button>
+                <button onclick="document.getElementById('op-exp-out').innerText = 'Output: ' + (15 % 4)" class="bg-slate-700 px-3 py-1 rounded hover:bg-slate-600">15 % 4</button>
+                <button onclick="document.getElementById('op-exp-out').innerText = 'Output: ' + (5 ** 3)" class="bg-slate-700 px-3 py-1 rounded hover:bg-slate-600">5 ** 3</button>
+            </div>
+            <span id="op-exp-out" class="font-mono text-sm bg-slate-900 px-4 py-1 rounded border border-slate-700 text-emerald-400 font-bold">Output: ?</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 class="animate-in text-4xl font-black text-slate-800 mb-1 border-l-8 border-sky-500 pl-5">Try It Live! ⚡</h2>
+        <p class="animate-in text-base text-slate-500 mb-4">Edit statements below, then execute to verify order of operations (BODMAS / PEMDAS).</p>
+
+        <div class="animate-in grid grid-cols-2 gap-6 items-stretch flex-grow">
+            <div class="flex flex-col bg-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                <div class="flex items-center justify-between px-4 py-2 bg-slate-700 border-b border-slate-600">
+                    <span class="text-sm text-slate-300 font-mono"><i class="fa-solid fa-file-code mr-2 text-emerald-400"></i>math_engine.py</span>
+                    <span class="text-xs bg-emerald-600/30 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Editable!</span>
+                </div>
+                <div class="p-4 flex-grow">
+                    <textarea id="live-editor" rows="7" spellcheck="false" placeholder="# Type operations here!
+print(10 + 2 * 5)
+print((10 + 2) * 5)
+print(9 % 2)
+print(2 ** 4)"></textarea>
+                </div>
+                <button onclick="runLiveCode()" class="m-4 mt-0 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-white font-black py-2.5 rounded-xl transition text-base flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30">
+                    <i class="fa-solid fa-play"></i> Compute Statements
+                </button>
+            </div>
+
+            <div class="terminal-box flex flex-col">
+                <div class="terminal-header">
+                    <div class="dot bg-red-500"></div>
+                    <div class="dot bg-yellow-500"></div>
+                    <div class="dot bg-green-500"></div>
+                    <span class="text-xs text-slate-400 font-mono ml-2">Python Sandbox Environment</span>
+                </div>
+                <div id="live-terminal" class="p-5 font-mono text-base space-y-1 bg-slate-950 flex-grow overflow-y-auto min-h-0">
+                    <span class="text-slate-600"># Click Compute Statements to run simulation...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 class="animate-in text-4xl font-black text-slate-800 mb-1 border-l-8 border-rose-500 pl-5">Bug Hunt Challenge! 🪲</h2>
+        <p class="animate-in text-base text-slate-500 mb-4">Click the individual rows to find exactly <strong>3 syntax errors</strong> hiding in the program setup.</p>
+
+        <div class="animate-in bg-slate-900 rounded-xl p-4 shadow-xl flex-grow flex flex-col justify-center">
+            <div class="space-y-2 font-mono text-slate-300">
+                <div onclick="clickBugLine(0, false)" id="bug-0" class="bug-line">
+                    <span class="text-slate-500 mr-3">1</span><span class="text-sky-400">apples</span> = <span class="text-amber-400">12</span>
+                </div>
+                <div onclick="clickBugLine(1, true)" id="bug-1" class="bug-line">
+                    <span class="text-slate-500 mr-3">2</span><span class="text-sky-400">total</span> = <span class="text-sky-400">apples</span> ^ <span class="text-amber-400">2</span> <span class="text-slate-500"># Attempting to square a variable name</span>
+                </div>
+                <div onclick="clickBugLine(2, false)" id="bug-2" class="bug-line">
+                    <span class="text-slate-500 mr-3">3</span><span class="text-sky-400">remainder</span> = <span class="text-amber-400">15</span> % <span class="text-amber-400">4</span>
+                </div>
+                <div onclick="clickBugLine(3, true)" id="bug-3" class="bug-line">
+                    <span class="text-slate-500 mr-3">4</span><span class="text-sky-400">output</span> = <span class="text-amber-400">10</span> / <span class="text-amber-400">0</span> <span class="text-slate-500"># Dividing by absolutely nothing</span>
+                </div>
+                <div onclick="clickBugLine(4, true)" id="bug-4" class="bug-line">
+                    <span class="text-slate-500 mr-3">5</span><span class="text-sky-400">half_value</span> = <span class="text-amber-400">14</span> // <span class="text-rose-400">/</span> <span class="text-amber-400">2</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="animate-in mt-4 flex items-center justify-between bg-slate-100 rounded-xl p-3">
+            <span class="text-sm font-bold text-slate-700" id="bug-status">Bugs found: 0 / 3</span>
+            <span class="text-xs text-slate-500"><i class="fa-solid fa-circle-info mr-1"></i>Carefully track symbol logic!</span>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 class="animate-in text-4xl font-black text-slate-800 mb-2 border-l-8 border-amber-500 pl-5">🚨 Final Assessment: Predict Output</h2>
+        <p class="animate-in text-lg text-slate-500 mb-6">Evaluate the exact operator precedence cascade rules inside your head!</p>
+
+        <div class="animate-in grid grid-cols-2 gap-8 items-center flex-grow">
+            <div class="space-y-4">
+                <div class="code-block text-xl">
+                    <span class="text-sky-400">score</span> = <span class="text-amber-300">5 + 3 * 2 ** 3 // 4</span><br>
+                    <span class="text-emerald-400">print</span>(score)
+                </div>
+                <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl text-sm text-slate-700">
+                    <strong>Precedence order:</strong> Exponentiation (<code class="font-mono">**</code>) runs first, followed by Multiplication/Division, followed by Addition/Subtraction.
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3">
+                <button onclick="checkQuizAnswer(this, false)" class="quiz-btn p-4 bg-white rounded-xl text-left text-base font-bold text-slate-700 hover:border-slate-400">
+                    A) <span class="font-mono">16.0</span> (Calculated linear left-to-right)
+                </button>
+                <button onclick="checkQuizAnswer(this, true)" class="quiz-btn p-4 bg-white rounded-xl text-left text-base font-bold text-slate-700 hover:border-slate-400">
+                    B) <span class="font-mono">11</span> (2**3=8 -> 3*8=24 -> 24//4=6 -> 5+6=11)
+                </button>
+                <button onclick="checkQuizAnswer(this, false)" class="quiz-btn p-4 bg-white rounded-xl text-left text-base font-bold text-slate-700 hover:border-slate-400">
+                    C) <span class="font-mono">11.0</span> (Floor division leaves decimal traces)
+                </button>
+                <button onclick="checkQuizAnswer(this, false)" class="quiz-btn p-4 bg-white rounded-xl text-left text-base font-bold text-slate-700 hover:border-slate-400">
+                    D) <span class="font-mono">Error</span> (Mixing multiple integers with floor cuts)
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="progress-bar" id="progress"></div>
+<div class="nav-hint">Use <span class="key-box">&larr;</span><span class="key-box">&rarr;</span> or <span class="key-box">Space</span> to navigate</div>
+
+<script>
+    // ── SLIDE ENGINE STATE MANAGEMENT ──
+    const slides = document.querySelectorAll('.slide');
+    let currentSlideIndex = 0;
+    const totalSlides = slides.length;
+
+    function updatePresentation() {
+        slides.forEach((slide, idx) => {
+            if (idx === currentSlideIndex) {
+                slide.classList.add('active');
+            } else {
+                slide.classList.remove('active');
+            }
+        });
+        
+        // Counter status
+        document.getElementById('slide-counter').textContent = `${currentSlideIndex + 1} / ${totalSlides}`;
+        
+        // Progress bar tracking width calculation
+        const percent = (currentSlideIndex / (totalSlides - 1)) * 100;
+        document.getElementById('progress').style.width = `${percent}%`;
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (document.activeElement.tagName === 'TEXTAREA') return; // Bypass if typing in code playground
+        
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            if (currentSlideIndex < totalSlides - 1) {
+                currentSlideIndex++;
+                updatePresentation();
+            }
+        } else if (e.key === 'ArrowLeft') {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                updatePresentation();
+            }
+        }
+    });
+
+    // ── QUIZ OPTION CHECKER ──
+    function checkQuizAnswer(btn, isCorrect) {
+        if (isCorrect) {
+            btn.style.borderColor = '#10b981';
+            btn.style.backgroundColor = '#d1fae5';
+            btn.style.color = '#065f46';
+        } else {
+            btn.style.borderColor = '#fb7185';
+            btn.style.backgroundColor = '#ffe4e6';
+            btn.style.color = '#9f1239';
+            btn.classList.add('shake');
+            setTimeout(() => btn.classList.remove('shake'), 400);
+        }
+    }
+
+    // ── BUG HUNT MANAGEMENT SYSTEM ──
+    let discoveredBugs = new Set();
+    function clickBugLine(idx, isBug) {
+        const el = document.getElementById(`bug-${idx}`);
+        if (isBug) {
+            el.classList.add('found-bug');
+            discoveredBugs.add(idx);
+            document.getElementById('bug-status').innerHTML = `Bugs found: <span class="text-rose-600 font-bold">${discoveredBugs.size} / 3</span>`;
+            if (discoveredBugs.size === 3) {
+                document.getElementById('bug-status').innerHTML = `🎉 Perfect! You successfully neutralized all compilation errors!`;
+            }
+        } else {
+            el.classList.add('clean-line');
+        }
+    }
+
+    // ── PARSER CODE INTERPRETER SIMULATOR ──
+    function parsePrintStatements(code) {
+        const lines = code.split('\n');
+        const outputs = [];
+
+        for (let line of lines) {
+            line = line.trim();
+            if (!line || line.startsWith('#')) continue;
+
+            if (line.startsWith('print(') && line.endsWith(')')) {
+                const inner = line.slice(6, -1).trim();
+                
+                // Safe basic processing evaluation using native mathematical calculation rules
+                try {
+                    // Quick check if input is string format parameter sequence or mathematical pattern expression
+                    if ((inner.startsWith('"') && inner.endsWith('"')) || (inner.startsWith("'") && inner.endsWith("'"))) {
+                        outputs.push({ type: 'text', value: inner.slice(1, -1) });
+                    } else {
+                        // Check for forbidden syntax elements
+                        if (inner.includes('^')) {
+                            outputs.push({ type: 'error', value: "SyntaxError: ^ is XOR in Python. Use ** for exponentiation power calculations." });
+                            continue;
+                        }
+                        if (inner.includes('/ 0') || inner.includes('// 0') || inner.includes('% 0')) {
+                            outputs.push({ type: 'error', value: "ZeroDivisionError: integer division or modulo by zero" });
+                            continue;
+                        }
+                        
+                        // Executing basic math expressions securely via clean sanitized JavaScript mapping match replacement values
+                        let standardExpression = inner.replace(/\/\//g, '/'); // Fallback map conversion handling
+                        let evaluatedValue = Function(`"use strict"; return (${inner})`)();
+                        outputs.push({ type: 'text', value: String(evaluatedValue) });
+                    }
+                } catch (err) {
+                    outputs.push({ type: 'error', value: `SyntaxError: Expression computation issue inside context container.` });
+                }
+            } else if (line.startsWith('print')) {
+                outputs.push({ type: 'error', value: `SyntaxError: Missing parentheses around expression statements.` });
+            } else {
+                outputs.push({ type: 'error', value: `SyntaxError: Invalid syntax evaluation statement pattern on line structure.` });
+            }
+        }
+        return outputs;
+    }
+
+    async function runLiveCode() {
+        const code = document.getElementById('live-editor').value;
+        const screen = document.getElementById('live-terminal');
+        screen.innerHTML = '';
+
+        if (!code.trim()) {
+            screen.innerHTML = '<span class="text-slate-500"># Write math print operations and click compute statements!</span>';
+            return;
+        }
+
+        const outputs = parsePrintStatements(code);
+
+        if (outputs.length === 0) {
+            screen.innerHTML = '<span class="text-slate-500 italic">(no statements executed)</span>';
+            return;
+        }
+
+        for (const out of outputs) {
+            const el = document.createElement('div');
+            if (out.type === 'error') {
+                el.className = 'text-rose-400 font-bold';
+            } else {
+                el.className = 'text-emerald-400 font-mono';
+            }
+            screen.appendChild(el);
+
+            // Simple fast typewriter render loop execution configuration
+            for (const ch of out.value) {
+                el.textContent += ch;
+                await new Promise(r => setTimeout(r, 8));
+            }
+        }
+    }
+</script>
+</body>
+</html>

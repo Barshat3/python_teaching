@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Teaching — Barshat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #161921;
+      --border: #252a35;
+      --accent: #f7c948;
+      --accent2: #3ef0b0;
+      --text: #e8ecf4;
+      --muted: #6b7592;
+      --card-hover: #1d2130;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* grid bg */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(247,201,72,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(247,201,72,.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 64px;
+    }
+
+    .eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -.02em;
+    }
+
+    h1 span.py {
+      color: var(--accent);
+    }
+
+    .tagline {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 1rem;
+      font-family: 'Space Mono', monospace;
+      max-width: 480px;
+      line-height: 1.7;
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      margin-top: 32px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .prog-seg {
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      flex: 1;
+      transition: background .3s;
+    }
+
+    .prog-seg.done { background: var(--accent); }
+
+    .prog-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      margin-left: 8px;
+      white-space: nowrap;
+    }
+
+    /* Section label */
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* Cards grid */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 24px;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .22s, background .22s, transform .22s;
+      cursor: pointer;
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 80% 20%, rgba(247,201,72,.07), transparent 60%);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      background: var(--card-hover);
+      transform: translateY(-3px);
+    }
+
+    .card:hover::after { opacity: 1; }
+
+    .card-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: .1em;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.7;
+      flex: 1;
+    }
+
+    .card-arrow {
+      align-self: flex-end;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .2s, background .2s;
+      margin-top: 4px;
+    }
+
+    .card:hover .card-arrow {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .card:hover .card-arrow svg { stroke: #0d0f14; }
+
+    .card-arrow svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--muted);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke .2s;
+    }
+
+    /* Special card — Loops (featured) */
+    .card.featured {
+      grid-column: 1 / -1;
+      flex-direction: row;
+      align-items: center;
+      gap: 24px;
+      background: linear-gradient(120deg, #1a1e2b 60%, #1f2230);
+      border-color: rgba(62,240,176,.3);
+    }
+
+    .card.featured::after {
+      background: radial-gradient(circle at 90% 50%, rgba(62,240,176,.08), transparent 60%);
+      opacity: 1;
+    }
+
+    .card.featured:hover {
+      border-color: var(--accent2);
+      transform: translateY(-3px);
+    }
+
+    .card.featured:hover .card-arrow {
+      border-color: var(--accent2);
+      background: var(--accent2);
+    }
+
+    .card.featured .card-num { color: var(--accent2); }
+
+    .card.featured .featured-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      border: 1px solid var(--accent2);
+      border-radius: 4px;
+      padding: 2px 8px;
+      display: inline-block;
+      margin-bottom: 2px;
+    }
+
+    .card.featured .card-info { flex: 1; }
+
+    .card.featured .card-title { font-size: 1.25rem; }
+
+    /* Footer */
+    footer {
+      margin-top: 72px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .footer-text a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .footer-text a:hover { text-decoration: underline; }
+
+    /* Fade-in animation */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    header { animation: fadeUp .5s ease both; }
+    .cards .card:nth-child(1) { animation: fadeUp .5s .1s ease both; }
+    .cards .card:nth-child(2) { animation: fadeUp .5s .15s ease both; }
+    .cards .card:nth-child(3) { animation: fadeUp .5s .2s ease both; }
+    .cards .card:nth-child(4) { animation: fadeUp .5s .25s ease both; }
+    .cards .card:nth-child(5) { animation: fadeUp .5s .3s ease both; }
+    .cards .card:nth-child(6) { animation: fadeUp .5s .35s ease both; }
+    footer { animation: fadeUp .5s .45s ease both; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <div class="eyebrow">Mero Coding Class</div>
+      <h1>Learn <span class="py">Python</span><br>From Scratch</h1>
+      <p class="tagline">// Interactive slide decks to learn Python step by step. Click any lesson to open it.</p>
+      <div class="progress-bar">
+        <div class="prog-seg done"></div>
+        <div class="prog-seg done"></div>
+        <div class="prog-seg done"></div>
+        <div class="prog-seg done"></div>
+        <div class="prog-seg done"></div>
+        <div class="prog-seg done"></div>
+        <span class="prog-label">6 / 6 lessons</span>
+      </div>
+    </header>
+
+    <p class="section-label">All Lessons</p>
+
+    <div class="cards">
+
+      <!-- Featured / latest -->
+      <a class="card featured" href="Loops_Slides.html">
+        <div class="card-info">
+          <div class="card-num">06</div>
+          <div class="featured-badge">★ Latest</div>
+          <div class="card-title">For Loop vs While Loop</div>
+          <div class="card-desc">Iteration in Python — when to use for and when to use while. Animated comparisons, live examples, and use-case breakdowns.</div>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </a>
+
+      <a class="card" href="1.intro_print.html">
+        <div class="card-num">01</div>
+        <div class="card-title">Intro & print()</div>
+        <div class="card-desc">Your first Python program. What Python is, how to write it, and how print() works.</div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </a>
+
+      <a class="card" href="2_variables.html">
+        <div class="card-num">02</div>
+        <div class="card-title">Variables</div>
+        <div class="card-desc">Storing and naming data. Variable rules, assignment, and how Python manages memory.</div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </a>
+
+      <a class="card" href="3_basic_arithmetic_operator.html">
+        <div class="card-num">03</div>
+        <div class="card-title">Arithmetic Operators</div>
+        <div class="card-desc">+, -, *, /, //, %, ** — all the math operators Python gives you and when to use each one.</div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </a>
+
+      <a class="card" href="4_Input.html">
+        <div class="card-num">04</div>
+        <div class="card-title">User Input</div>
+        <div class="card-desc">Reading keyboard input with input(). Converting types and building interactive scripts.</div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </a>
+
+      <a class="card" href="5_string_operations.html">
+        <div class="card-num">05</div>
+        <div class="card-title">String Operations</div>
+        <div class="card-desc">Slicing, concatenation, f-strings, and the most-used string methods every Python dev needs.</div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </a>
+
+    </div>
+
+    <footer>
+      <span class="footer-text">Made by <a href="https://github.com/Barshat3" target="_blank">Barshat</a> · Mero Coding Class</span>
+      <span class="footer-text"><a href="https://github.com/Barshat3/Python-Teaching" target="_blank">View source on GitHub →</a></span>
+    </footer>
+
+  </div>
+</body>
+</html>
