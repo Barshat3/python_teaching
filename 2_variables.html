@@ -240,7 +240,37 @@
                 </div>
             </div>
         </div>
-                <!-- NEW: Data Types Deep Dive Slide -->
+        <div class="slide">
+            <h2 class="text-4xl font-bold text-slate-800 mb-5 border-l-8 border-blue-500 pl-6">What is a Variable? 🤔</h2>
+            <p class="text-xl leading-relaxed text-slate-600 mb-6">In programming, a <strong>variable</strong> is a named memory storage box. You can put things inside it, change them later, or read what's stored — all by using its label.</p>
+
+            <div class="grid grid-cols-2 gap-8 items-center flex-grow">
+                <div class="space-y-4">
+                    <div class="code-block text-xl leading-relaxed">
+                        <div><span class="text-sky-400">age</span> <span class="text-rose-400">=</span> <span class="text-amber-400">12</span></div>
+                        <div class="mt-2"><span class="text-sky-400">name</span> <span class="text-rose-400">=</span> <span class="text-emerald-400">"Alice"</span></div>
+                    </div>
+                    <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                        <p class="text-slate-700 font-semibold"><i class="fa-solid fa-tags text-blue-500 mr-2"></i>The Break Down:</p>
+                        <ul class="space-y-2 text-slate-600 text-base">
+                            <li class="flex items-start gap-2"><span class="mt-1 w-2 h-2 rounded-full bg-sky-400 flex-shrink-0"></span><span><strong class="text-slate-900 font-mono">age</strong> — the <strong>Label</strong> (Variable Name)</span></li>
+                            <li class="flex items-start gap-2"><span class="mt-1 w-2 h-2 rounded-full bg-rose-400 flex-shrink-0"></span><span><strong class="text-slate-900 font-mono text-lg">=</strong> — the <strong>Assignment Operator</strong></span></li>
+                            <li class="flex items-start gap-2"><span class="mt-1 w-2 h-2 rounded-full bg-amber-400 flex-shrink-0"></span><span><strong class="text-slate-900 font-mono">12</strong> — the <strong>Value</strong> stored inside</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-700">
+                        <i class="fa-solid fa-lightbulb text-blue-500 mr-2"></i>
+                        <strong>Naming Rules:</strong> use <code class="font-mono bg-blue-100 px-1 rounded">snake_case</code>, no spaces, no starting with a number!
+                    </div>
+                </div>
+                <div class="flex flex-col items-center justify-center bg-blue-50 border border-blue-100 rounded-2xl p-8 h-full gap-4">
+                    <i class="fa-solid fa-box-archive text-8xl text-blue-500 animate-bounce" style="animation-duration:2s"></i>
+                    <p class="text-center font-medium text-slate-700 text-lg">Instead of remembering messy computer addresses like <code class="font-mono text-blue-600 bg-blue-100 px-1 rounded">0x7ffd4a</code>, we just talk to boxes by their labels!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: Data Types Deep Dive Slide -->
         <div class="slide">
             <h2 class="text-4xl font-bold text-slate-800 mb-3 border-l-8 border-indigo-500 pl-6">🧬 Python's 4 Core Data Types</h2>
             <p class="text-base text-slate-500 mb-5">Each type tells Python <em>how</em> to store and use the data. Hover a card to explore, then try the live demo below!</p>
@@ -333,35 +363,6 @@
                 <div id="type-result" class="min-w-[180px] text-center bg-slate-900 rounded-xl p-4 border-2 border-slate-700 transition-all">
                     <p class="text-slate-500 text-xs mb-1">Output</p>
                     <p id="type-result-text" class="font-mono text-slate-500 text-base">click a value →</p>
-                </div>
-            </div>
-        </div>
-        <div class="slide">
-            <h2 class="text-4xl font-bold text-slate-800 mb-5 border-l-8 border-blue-500 pl-6">What is a Variable? 🤔</h2>
-            <p class="text-xl leading-relaxed text-slate-600 mb-6">In programming, a <strong>variable</strong> is a named memory storage box. You can put things inside it, change them later, or read what's stored — all by using its label.</p>
-            
-            <div class="grid grid-cols-2 gap-8 items-center flex-grow">
-                <div class="space-y-4">
-                    <div class="code-block text-xl leading-relaxed">
-                        <div><span class="text-sky-400">age</span> <span class="text-rose-400">=</span> <span class="text-amber-400">12</span></div>
-                        <div class="mt-2"><span class="text-sky-400">name</span> <span class="text-rose-400">=</span> <span class="text-emerald-400">"Alice"</span></div>
-                    </div>
-                    <div class="p-6 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
-                        <p class="text-slate-700 font-semibold"><i class="fa-solid fa-tags text-blue-500 mr-2"></i>The Break Down:</p>
-                        <ul class="space-y-2 text-slate-600 text-base">
-                            <li class="flex items-start gap-2"><span class="mt-1 w-2 h-2 rounded-full bg-sky-400 flex-shrink-0"></span><span><strong class="text-slate-900 font-mono">age</strong> — the <strong>Label</strong> (Variable Name)</span></li>
-                            <li class="flex items-start gap-2"><span class="mt-1 w-2 h-2 rounded-full bg-rose-400 flex-shrink-0"></span><span><strong class="text-slate-900 font-mono text-lg">=</strong> — the <strong>Assignment Operator</strong></span></li>
-                            <li class="flex items-start gap-2"><span class="mt-1 w-2 h-2 rounded-full bg-amber-400 flex-shrink-0"></span><span><strong class="text-slate-900 font-mono">12</strong> — the <strong>Value</strong> stored inside</span></li>
-                        </ul>
-                    </div>
-                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-700">
-                        <i class="fa-solid fa-lightbulb text-blue-500 mr-2"></i>
-                        <strong>Naming Rules:</strong> use <code class="font-mono bg-blue-100 px-1 rounded">snake_case</code>, no spaces, no starting with a number!
-                    </div>
-                </div>
-                <div class="flex flex-col items-center justify-center bg-blue-50 border border-blue-100 rounded-2xl p-8 h-full gap-4">
-                    <i class="fa-solid fa-box-archive text-8xl text-blue-500 animate-bounce" style="animation-duration:2s"></i>
-                    <p class="text-center font-medium text-slate-700 text-lg">Instead of remembering messy computer addresses like <code class="font-mono text-blue-600 bg-blue-100 px-1 rounded">0x7ffd4a</code>, we just talk to boxes by their labels!</p>
                 </div>
             </div>
         </div>
